@@ -7,11 +7,14 @@ phases:
   build:
     commands:
       - echo running aws cloudformation command to deploy helper-stack
-      - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file helper-stack/RootStack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CLONE_TEMPLATE_BUCKET}" "S3LogBucket"="${S3LogBucket}" --stack-name helper-stack-${Environment}
-      - echo helper-stack-${Environment} deploy completed
+      - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file helper-stack/RootStack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CLONE_TEMPLATE_BUCKET}" "S3LogBucket"="${S3LogBucket}" --stack-name test-helper-stack
+      - echo test-helper-stack deploy completed
+      - echo running aws cloudformation command to deploy network-stack
+      - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file network-stack/RootStack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CLONE_TEMPLATE_BUCKET}" "SSLCertificateID"="${SSLCertificateID}" --stack-name test-network-stack
+      - echo test-network-stack deploy completed
       - echo running aws cloudformation command to deploy infra-stack
-      - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file infra-stack/RootStack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CLONE_TEMPLATE_BUCKET}" "SSLCertificateID"="${SSLCertificateID}" --stack-name infra-stack-${Environment}
-      - echo infra-stack-${Environment} deploy completed
+      - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file infra-stack/RootStack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CLONE_TEMPLATE_BUCKET}" "SSLCertificateID"="${SSLCertificateID}" --stack-name test-infra-stack
+      - echo test-infra-stack deploy completed
       - echo running s3 sync command
       - aws s3 sync ./ s3://${CURRENT_TEMPLATE_BUCKET}/ --exclude "buildspec-stack-update.yml" --exclude "buildspec.yml" --exclude ".*"
 artifacts:
