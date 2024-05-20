@@ -1,0 +1,194 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Docker Image repository
+Parameters:
+  ProjectName:
+    Type: String
+  Environment:
+    Type: String
+
+Conditions:
+  Staging: !Equals [!Ref Environment, staging]
+  Development: !Equals [!Ref Environment, development]
+  Production: !Equals [!Ref Environment, production]
+  CreateResource: !Or [!Equals [ !Ref Environment, development ], !Equals [ !Ref Environment, staging ]]
+
+Resources:
+  APIRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "${ProjectName}-api-${Environment}"
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+            {
+                "rulePriority": 1,
+                "description": "This Rule will delete images except the latest 10-count",
+                "selection": {
+                    "tagStatus": "any",
+                    "countType": "imageCountMoreThan",
+                    "countNumber": 10
+                },
+                "action": {
+                    "type": "expire"
+                }
+              }
+            ]
+          }
+        RegistryId: !Ref AWS::AccountId
+      Tags:
+      - Key: Name
+        Value: !Sub "${ProjectName}-api-${Environment}"
+ 
+  AdminRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "${ProjectName}-admin-${Environment}"
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+            {
+                "rulePriority": 1,
+                "description": "This Rule will delete images except the latest 10-count",
+                "selection": {
+                    "tagStatus": "any",
+                    "countType": "imageCountMoreThan",
+                    "countNumber": 10
+                },
+                "action": {
+                    "type": "expire"
+                }
+              }
+            ]
+          }
+        RegistryId: !Ref AWS::AccountId
+      Tags:
+      - Key: Name
+        Value: !Sub "${ProjectName}-admin-${Environment}"
+
+  AppRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "${ProjectName}-app-${Environment}"
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+            {
+                "rulePriority": 1,
+                "description": "This Rule will delete images except the latest 10-count",
+                "selection": {
+                    "tagStatus": "any",
+                    "countType": "imageCountMoreThan",
+                    "countNumber": 10
+                },
+                "action": {
+                    "type": "expire"
+                }
+              }
+            ]
+          }
+        RegistryId: !Ref AWS::AccountId
+      Tags:
+      - Key: Name
+        Value: !Sub "${ProjectName}-app-${Environment}"
+
+  NodebaseImage:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "${ProjectName}-app-base-image"
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+            {
+                "rulePriority": 1,
+                "description": "This Rule will delete images except the latest 10-count",
+                "selection": {
+                    "tagStatus": "any",
+                    "countType": "imageCountMoreThan",
+                    "countNumber": 10
+                },
+                "action": {
+                    "type": "expire"
+                }
+              }
+            ]
+          }
+        RegistryId: !Ref AWS::AccountId
+      Tags:
+      - Key: Name
+        Value: !Sub "${ProjectName}-node-base-image"
+    # Condition: CreateResource
+
+  # NginxbaseImage:
+  #   Type: AWS::ECR::Repository
+  #   Properties:
+  #     RepositoryName: !Sub "${ProjectName}-nginx-base-image"
+  #     LifecyclePolicy:
+  #       LifecyclePolicyText: |
+  #         {
+  #           "rules": [
+  #           {
+  #               "rulePriority": 1,
+  #               "description": "This Rule will delete images except the latest 10-count",
+  #               "selection": {
+  #                   "tagStatus": "any",
+  #                   "countType": "imageCountMoreThan",
+  #                   "countNumber": 10
+  #               },
+  #               "action": {
+  #                   "type": "expire"
+  #               }
+  #             }
+  #           ]
+  #         }
+  #       RegistryId: !Ref AWS::AccountId
+  #     Tags:
+  #     - Key: Name
+  #       Value: !Sub "${ProjectName}-nginx-base-image"
+  #   Condition: CreateResource
+  
+  #Custom_resource_lambda_fuction_has_to_be_added_manually&lambda_function_name_should_be_same_in_all_accound
+  APIRepositoryRepoDelete:
+    Type: Custom::APIRepositoryRepoDelete
+    Properties:
+      ServiceToken: !Sub "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:ECRRepoDelete"
+      EnvironmentType: !Sub ${Environment}
+      ProjectName: !Sub ${ProjectName}
+      repositoryName: !Ref APIRepository
+  
+  AdminRepositoryRepoDelete:
+    Type: Custom::AdminRepositoryRepoDelete
+    Properties:
+      ServiceToken: !Sub "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:ECRRepoDelete"
+      EnvironmentType: !Sub ${Environment}
+      ProjectName: !Sub ${ProjectName}
+      repositoryName: !Ref AdminRepository
+
+  AppRepositoryRepoDelete:
+    Type: Custom::AppRepositoryRepoDelete
+    Properties:
+      ServiceToken: !Sub "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:ECRRepoDelete"
+      EnvironmentType: !Sub ${Environment}
+      ProjectName: !Sub ${ProjectName}
+      repositoryName: !Ref AppRepository
+  
+  NodebaseImageRepoDelete:
+    Type: Custom::NodebaseImageRepoDelete
+    Properties:
+      ServiceToken: !Sub "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:ECRRepoDelete"
+      EnvironmentType: !Sub ${Environment}
+      ProjectName: !Sub ${ProjectName}
+      repositoryName: !Ref NodebaseImage
+    Condition: CreateResource
+
+  # NginxbaseImageRepoDelete:
+  #   Type: Custom::NginxbaseImageRepoDelete
+  #   Properties:
+  #     ServiceToken: !Sub "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:ECRRepoDelete"
+  #     EnvironmentType: !Sub ${Environment}
+  #     ProjectName: !Sub ${ProjectName}
+  #     repositoryName: !Ref NginxbaseImage
+  #   Condition: CreateResource
