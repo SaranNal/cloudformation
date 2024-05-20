@@ -10,8 +10,11 @@ phases:
       - OWNER=$GITHUB_OWNER
       - REPO=$GITHUB_REPO
       - TOKEN=$GITHUB_TOKEN
+      - echo $OWNER
+      - echo $REPO
+      - echo $TOKEN
       - URL="https://api.github.com/repos/$OWNER/$REPO/commits/$COMMIT_ID"
-      - COMMIT_DETAILS=$(curl -s -H "Authorization: token $TOKEN" $URL)
+      # - COMMIT_DETAILS=$(curl -s -H "Authorization: token $TOKEN" $URL)
       - AUTHOR=$(echo $COMMIT_DETAILS | python -c "import sys, json; print(json.load(sys.stdin)['commit']['author']['name'])")
       - COMMIT_MESSAGE=$(echo $COMMIT_DETAILS | python -c "import sys, json; print(json.load(sys.stdin)['commit']['message'])")
       - COMMIT_DATE=$(echo $COMMIT_DETAILS | python -c "import sys, json; print(json.load(sys.stdin)['commit']['author']['date'])")
