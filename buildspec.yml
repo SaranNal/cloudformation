@@ -10,6 +10,12 @@ phases:
       - OWNER=$GITHUB_OWNER
       - REPO=$GITHUB_REPO
       - TOKEN=$GITHUB_TOKEN
+      - COMMIT_DETAILS=$(curl -s -H "Authorization: token $TOKEN" $URL)
+      - AUTHOR=$(echo $COMMIT_DETAILS | python -c "import sys, json; print(json.load(sys.stdin)['commit']['author']['name'])")
+      - COMMIT_MESSAGE=$(echo $COMMIT_DETAILS | python -c "import sys, json; print(json.load(sys.stdin)['commit']['message'])")
+      - COMMIT_DATE=$(echo $COMMIT_DETAILS | python -c "import sys, json; print(json.load(sys.stdin)['commit']['author']['date'])")
+      - echo "Message: $COMMIT_MESSAGE"
+      - echo "Date: $COMMIT_DATE"
       - echo getting existing helper-stack template
       - aws cloudformation get-template --stack-name test-helper-stack --output json | jq -rc '.TemplateBody' > CurrentHelperRootstack.yaml
       - echo running aws cloudformation command to deploy helper-stack
