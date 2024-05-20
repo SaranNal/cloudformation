@@ -7,6 +7,9 @@ phases:
   build:
     commands:
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
+      - OWNER=$GITHUB_OWNER
+      - REPO=$GITHUB_REPO
+      - TOKEN=$GITHUB_TOKEN
       - echo getting existing helper-stack template
       - aws cloudformation get-template --stack-name test-helper-stack --output json | jq -rc '.TemplateBody' > CurrentHelperRootstack.yaml
       - echo running aws cloudformation command to deploy helper-stack
