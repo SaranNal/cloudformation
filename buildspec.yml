@@ -7,13 +7,13 @@ phases:
   build:
     commands:
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
-      - OWNER=$GITHUB_OWNER
-      - REPO=$GITHUB_REPO
-      - TOKEN=$GITHUB_TOKEN
-      - echo $OWNER
-      - echo $REPO
-      - echo $TOKEN
-      # - URL="https://api.github.com/repos/$OWNER/$REPO/commits/$COMMIT_ID"
+      - echo $GITHUB_OWNER
+      - echo $GITHUB_REPO
+      - echo $GITHUB_TOKEN
+      # - echo $OWNER
+      # - echo $REPO
+      # - echo $TOKEN
+      # # - URL="https://api.github.com/repos/$OWNER/$REPO/commits/$COMMIT_ID"
       # - COMMIT_DETAILS=$(curl -s -H "Authorization: token $TOKEN" $URL)
       # - AUTHOR=$(echo $COMMIT_DETAILS | python -c "import sys, json; print(json.load(sys.stdin)['commit']['author']['name'])")
       # - COMMIT_MESSAGE=$(echo $COMMIT_DETAILS | python -c "import sys, json; print(json.load(sys.stdin)['commit']['message'])")
