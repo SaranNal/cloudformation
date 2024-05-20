@@ -43,9 +43,9 @@ Resources:
             FromPort: 9443
             ToPort: 9443
             CidrIp: 0.0.0.0/0
-        # Tags:
-        #   - Key: Name
-        #     Value: !Sub ${Environment}-alb-sg
+        Tags:
+          - Key: Name
+            Value: !Sub ${Environment}-alb-sg
 
 Outputs:
   ECSSecurityGroup:
