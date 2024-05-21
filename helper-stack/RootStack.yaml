@@ -19,7 +19,7 @@ Parameters:
 
 Resources:
   S3:
-    Description: This is a S3 stack which creates buckets..
+    Description: This is a S3 stack which creates buckets...
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub https://s3.amazonaws.com/${StackBucketName}/helper-stack/S3.yaml
