@@ -23,9 +23,9 @@ Resources:
       Path: "/"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
-      # Tags:
-      #   - Key: Name
-      #     Value: !Sub ${ProjectName}-${Environment}-ecsTaskExecutionRole
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-ecsTaskExecutionRole
 
   ECSTaskRole:
     Type: AWS::IAM::Role
