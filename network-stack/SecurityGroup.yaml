@@ -5,7 +5,7 @@ Parameters:
   ProjectName:
     Type: String
   VPC:
-    Description: VPC
+    Description: VPCTesr
     Type: String
 
 Resources:
