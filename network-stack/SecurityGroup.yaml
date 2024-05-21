@@ -20,9 +20,9 @@ Resources:
           FromPort: 80
           ToPort: 80
           SourceSecurityGroupId: !Ref LoadbalancerSecurityGroup
-      Tags:
-        - Key: Name
-          Value: !Sub ${Environment}-ecs-sg
+      # Tags:
+      #   - Key: Name
+      #     Value: !Sub ${Environment}-ecs-sg
 
   LoadbalancerSecurityGroup:
       Type: AWS::EC2::SecurityGroup
