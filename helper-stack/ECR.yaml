@@ -120,7 +120,7 @@ Resources:
       Tags:
       - Key: Name
         Value: !Sub "${ProjectName}-node-base-image"
-    # Condition: CreateResource
+    Condition: CreateResource
 
   # NginxbaseImage:
   #   Type: AWS::ECR::Repository
