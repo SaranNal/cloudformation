@@ -68,7 +68,7 @@ Resources:
   #     HealthCheckGracePeriodSeconds: 300
   #     SchedulingStrategy: "REPLICA"
 
-  ECSServiceCodeDeploy:
+  ECSService:
     Type: AWS::ECS::Service
     Properties:
       ServiceName: !Sub ${Environment}
