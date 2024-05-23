@@ -39,34 +39,34 @@ Resources:
           - Key: environment
             Value: !Sub ${Environment}
 
-  ECSService:
-    Type: AWS::ECS::Service
-    Properties:
-      ServiceName: !Sub ${Environment}
-      Cluster: !Ref ECSCluster
-      DeploymentController:
-        Type: ECS
-      DesiredCount: 0
-      LaunchType: FARGATE
-      LoadBalancers:
-       - ContainerName: !Sub "${ProjectName}-api"
-         ContainerPort: 80
-         TargetGroupArn: !Ref TargetGroup2
-      TaskDefinition: !Ref ECSTaskDefinition
-      DeploymentConfiguration:
-        MaximumPercent: 200
-        MinimumHealthyPercent: 100
-        DeploymentCircuitBreaker:
-            Enable: false
-            Rollback: false
-      NetworkConfiguration:
-        AwsvpcConfiguration:
-          AssignPublicIp: DISABLED
-          SecurityGroups:
-            - !Ref ECSSecurityGroup
-          Subnets: !Ref PrivateSubnets
-      HealthCheckGracePeriodSeconds: 300
-      SchedulingStrategy: "REPLICA"
+  # ECSService:
+  #   Type: AWS::ECS::Service
+  #   Properties:
+  #     ServiceName: !Sub ${Environment}
+  #     Cluster: !Ref ECSCluster
+  #     DeploymentController:
+  #       Type: ECS
+  #     DesiredCount: 0
+  #     LaunchType: FARGATE
+  #     LoadBalancers:
+  #      - ContainerName: !Sub "${ProjectName}-api"
+  #        ContainerPort: 80
+  #        TargetGroupArn: !Ref TargetGroup2
+  #     TaskDefinition: !Ref ECSTaskDefinition
+  #     DeploymentConfiguration:
+  #       MaximumPercent: 200
+  #       MinimumHealthyPercent: 100
+  #       DeploymentCircuitBreaker:
+  #           Enable: false
+  #           Rollback: false
+  #     NetworkConfiguration:
+  #       AwsvpcConfiguration:
+  #         AssignPublicIp: DISABLED
+  #         SecurityGroups:
+  #           - !Ref ECSSecurityGroup
+  #         Subnets: !Ref PrivateSubnets
+  #     HealthCheckGracePeriodSeconds: 300
+  #     SchedulingStrategy: "REPLICA"
 
   ECSServiceCodeDeploy:
     Type: AWS::ECS::Service
