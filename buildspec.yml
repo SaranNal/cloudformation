@@ -6,38 +6,23 @@ phases:
       - aws --version
   build:
     commands:
-      # - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
-      # - echo $GITHUB_OWNER
-      # - echo $GITHUB_REPO
-      # - echo $GITHUB_TOKEN
-      # - echo $OWNER
-      # - echo $REPO
-      # - echo $TOKEN
-      # # - URL="https://api.github.com/repos/$OWNER/$REPO/commits/$COMMIT_ID"
-      # - COMMIT_DETAILS=$(curl -s -H "Authorization: token $TOKEN" $URL)
-      # - AUTHOR=$(echo $COMMIT_DETAILS | python -c "import sys, json; print(json.load(sys.stdin)['commit']['author']['name'])")
-      # - COMMIT_MESSAGE=$(echo $COMMIT_DETAILS | python -c "import sys, json; print(json.load(sys.stdin)['commit']['message'])")
-      # - COMMIT_DATE=$(echo $COMMIT_DETAILS | python -c "import sys, json; print(json.load(sys.stdin)['commit']['author']['date'])")
-      # - echo "Message: $COMMIT_MESSAGE"
-      # - echo "Date: $COMMIT_DATE"
       - echo getting existing helper-stack template
       - aws cloudformation get-template --stack-name test-helper-stack --output json | jq -rc '.TemplateBody' > CurrentHelperRootstack.yaml
       - echo running aws cloudformation command to deploy helper-stack
-      - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file ./CurrentHelperRootstack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CURRENT_TEMPLATE_BUCKET}" "S3LogBucket"="${S3LogBucket}" --stack-name helper-stack-${Environment}
-      - echo helper-stack-${Environment} deploy completed
-      # - echo getting existing network-stack template
-      # - aws cloudformation get-template --stack-name test-network-stack --output json | jq -rc '.TemplateBody' > CurrentNetworkRootstack.yaml
-      # - echo running aws cloudformation command to deploy network-stack
-      # - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file ./CurrentNetworkRootstack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CURRENT_TEMPLATE_BUCKET}" "SSLCertificateID"="${SSLCertificateID}" --stack-name test-network-stack
-      # - echo test-network-stack deploy completed
+      - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file ./CurrentHelperRootstack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CURRENT_TEMPLATE_BUCKET}" "S3LogBucket"="${S3LogBucket}" --stack-name helper-stack
+      - echo helper-stack deploy completed
+      - echo getting existing network-stack template
+      - aws cloudformation get-template --stack-name test-network-stack --output json | jq -rc '.TemplateBody' > CurrentNetworkRootstack.yaml
+      - echo running aws cloudformation command to deploy network-stack
+      - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file ./CurrentNetworkRootstack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CURRENT_TEMPLATE_BUCKET}" "SSLCertificateID"="${SSLCertificateID}" --stack-name network-stack
+      - echo network-stack deploy completed
       - echo getting existing infra-stack template
       - aws cloudformation get-template --stack-name test-infra-stack --output json | jq -rc '.TemplateBody' > CurrentInfraRootstack.yaml
       - echo running aws cloudformation command to deploy infra-stack
-      - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file ./CurrentInfraRootstack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CURRENT_TEMPLATE_BUCKET}" "SSLCertificateID"="${SSLCertificateID}" --stack-name infra-stack-${Environment}
-      - echo infra-stack-${Environment} deploy completed
+      - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file ./CurrentInfraRootstack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CURRENT_TEMPLATE_BUCKET}" "SSLCertificateID"="${SSLCertificateID}" --stack-name infra-stack
+      - echo infra-stack deploy completed
       - echo running s3 sync command
       - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec-stack-update.yml" --exclude "buildspec.yml" --exclude "CurrentHelperRootstack.yaml" --exclude "CurrentNetworkRootstack.yaml" --exclude "CurrentInfraRootstack.yaml" --exclude ".gitignore"
 artifacts:
   files:
     - "**/*"
-
