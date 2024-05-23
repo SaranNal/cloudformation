@@ -9,6 +9,22 @@ Parameters:
     Type: String
 
 Resources:
+  BluegreenDeploymentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-${Environment}-bluegreen-application-deploy-service
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codedeploy.amazonaws.com
+            Action: sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
+        - arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS
+
   ECSTaskExecutionRole:
     Type: AWS::IAM::Role
     Properties:
