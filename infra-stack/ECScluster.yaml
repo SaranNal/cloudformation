@@ -1,0 +1,242 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This stack is for creating ECScluster.
+Parameters:
+  Environment:
+    Type: String
+  ProjectName:
+    Type: String
+  PrivateSubnets:
+    Type: CommaDelimitedList
+  TargetGroup1:
+    Type: String
+  TargetGroup2:
+    Type: String
+  ECSSecurityGroup:
+    Type: String
+
+# Conditions:
+#   Staging: !Equals [!Ref Environment, staging]
+#   Development: !Equals [!Ref Environment, development]
+#   Production: !Equals [!Ref Environment, production]
+#   CreateResource: !Or [!Equals [ !Ref Environment, production ], !Equals [ !Ref Environment, staging ]]
+
+Resources:
+  EcsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /ecs/${ProjectName}-${Environment}
+
+  ECSCluster:
+      Type: AWS::ECS::Cluster
+      Properties:
+        ClusterName: !Sub ${ProjectName}-${Environment}
+        CapacityProviders:
+          - FARGATE
+        ClusterSettings:
+          - Name: containerInsights
+            Value: enabled
+        Tags:
+          - Key: environment
+            Value: !Sub ${Environment}
+
+  # ECSService:
+  #   Type: AWS::ECS::Service
+  #   Properties:
+  #     ServiceName: !Sub ${Environment}
+  #     Cluster: !Ref ECSCluster
+  #     DeploymentController:
+  #       Type: ECS
+  #     DesiredCount: 0
+  #     LaunchType: FARGATE
+  #     LoadBalancers:
+  #      - ContainerName: !Sub "${ProjectName}-api"
+  #        ContainerPort: 80
+  #        TargetGroupArn: !Ref TargetGroup2
+  #     TaskDefinition: !Ref ECSTaskDefinition
+  #     DeploymentConfiguration:
+  #       MaximumPercent: 200
+  #       MinimumHealthyPercent: 100
+  #       DeploymentCircuitBreaker:
+  #           Enable: false
+  #           Rollback: false
+  #     NetworkConfiguration:
+  #       AwsvpcConfiguration:
+  #         AssignPublicIp: DISABLED
+  #         SecurityGroups:
+  #           - !Ref ECSSecurityGroup
+  #         Subnets: !Ref PrivateSubnets
+  #     HealthCheckGracePeriodSeconds: 300
+  #     SchedulingStrategy: "REPLICA"
+
+  ECSService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub ${Environment}
+      Cluster: !Ref ECSCluster
+      DeploymentController:
+        Type: CODE_DEPLOY
+      DesiredCount: 0
+      LaunchType: FARGATE
+      LoadBalancers:
+       - ContainerName: !Sub "${ProjectName}-api"
+         ContainerPort: 80
+         TargetGroupArn: !Ref TargetGroup2
+      TaskDefinition: !Ref ECSTaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !Ref ECSSecurityGroup
+          Subnets: !Ref PrivateSubnets
+    # Condition: CreateResource
+
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    UpdateReplacePolicy: Retain
+    Properties:
+      Family: !Sub ${ProjectName}-${Environment}
+      Cpu: "1024"
+      Memory: "3072"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/${ProjectName}-${Environment}-ecsTaskExecutionRole"
+      TaskRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/${ProjectName}-${Environment}-ecsTaskRole"
+      ContainerDefinitions:
+        - Name: !Sub "${ProjectName}-api"
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ProjectName}-api-${Environment}:latest"
+          MemoryReservation: 1024
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref EcsLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+        - Name: !Sub "${ProjectName}-admin-portal"
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ProjectName}-admin-${Environment}:latest"
+          MemoryReservation: 1024
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref EcsLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+        - Name: !Sub "${ProjectName}-app-portal"
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ProjectName}-app-${Environment}:latest"
+          MemoryReservation: 1024
+          PortMappings:
+            - ContainerPort: 8081
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref EcsLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  ScaleDownAlarm:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      AlarmName: !Sub "${Environment}-web-ScaleDown-Alarm"
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref WebScaleDownPolicy
+      MetricName: "CPUUtilization"
+      Namespace: "AWS/ECS"
+      Statistic: "Average"
+      Dimensions:
+        -
+          Name: "ClusterName"
+          Value: !Sub "${ProjectName}-${Environment}"
+        -
+          Name: "ServiceName"
+          Value: !Sub "${Environment}"
+      Period: 60
+      Unit: "Percent"
+      EvaluationPeriods: 15
+      DatapointsToAlarm: 15
+      Threshold: 25
+      ComparisonOperator: "LessThanOrEqualToThreshold"
+  ScaleUpAlarm:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      AlarmName: !Sub "${Environment}-web-ScaleUp-Alarm"
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref WebScaleUpPolicy
+      MetricName: "CPUUtilization"
+      Namespace: "AWS/ECS"
+      Statistic: "Average"
+      Dimensions:
+        -
+          Name: "ClusterName"
+          Value: !Sub "${ProjectName}-${Environment}"
+        -
+          Name: "ServiceName"
+          Value: !Sub "${Environment}"
+      Period: 60
+      Unit: "Percent"
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 40
+      ComparisonOperator: "GreaterThanOrEqualToThreshold"
+  ApplicationAutoScalingScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 5
+      MinCapacity: 1
+      ResourceId: !Join
+        - '/'
+        - - service
+          - !Ref ECSCluster
+          - !GetAtt ECSService.Name
+      #This RoleARN cannot be create by template need to be create manually
+      RoleARN: !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService"
+      ScalableDimension: "ecs:service:DesiredCount"
+      ServiceNamespace: "ecs"
+  WebScaleUpPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties:
+      PolicyName: !Sub "${Environment}-Web-ScaleUp-Policy"
+      PolicyType: "StepScaling"
+      ScalingTargetId: !Ref ApplicationAutoScalingScalableTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: "ChangeInCapacity"
+        Cooldown: 60
+        MetricAggregationType: "Average"
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0
+            ScalingAdjustment: 1
+  WebScaleDownPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties:
+      PolicyName: !Sub "${Environment}-Web-ScaleDown-Policy"
+      PolicyType: "StepScaling"
+      ScalingTargetId: !Ref ApplicationAutoScalingScalableTarget
+      StepScalingPolicyConfiguration:
+        AdjustmentType: "ChangeInCapacity"
+        Cooldown: 120
+        MetricAggregationType: "Average"
+        StepAdjustments:
+          - MetricIntervalUpperBound: 0
+            ScalingAdjustment: -1
+
+Outputs:
+  ECSCluster:
+    Value: !Ref ECSCluster
+    Export:
+      Name: !Sub ${ProjectName}-${Environment}-ECSCluster
+  ECSTaskDefinition:
+    Value: !Ref ECSTaskDefinition
+    Export:
+      Name: !Sub ${ProjectName}-${Environment}-ECSTaskDefinition
+  EcsLogGroup:
+    Value: !Ref EcsLogGroup
+    Export:
+      Name: !Sub ${ProjectName}-${Environment}-EcsLogGroup
