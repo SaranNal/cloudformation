@@ -7,17 +7,17 @@ phases:
   build:
     commands:
       - echo getting existing helper-stack template
-      - aws cloudformation get-template --stack-name helper-stack --output json | jq -rc '.TemplateBody' > CurrentHelperRootstack.yaml
+      - aws cloudformation get-template --stack-name test-helper-stack --output json | jq -rc '.TemplateBody' > CurrentHelperRootstack.yaml
       - echo running aws cloudformation command to deploy helper-stack
       - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file ./CurrentHelperRootstack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CURRENT_TEMPLATE_BUCKET}" "S3LogBucket"="${S3LogBucket}" --stack-name helper-stack-${Environment}
       - echo helper-stack-${Environment} deploy completed
       - echo getting existing network-stack template
-      - aws cloudformation get-template --stack-name network-stack --output json | jq -rc '.TemplateBody' > CurrentNetworkRootstack.yaml
+      - aws cloudformation get-template --stack-name test-network-stack --output json | jq -rc '.TemplateBody' > CurrentNetworkRootstack.yaml
       - echo running aws cloudformation command to deploy network-stack
       - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file ./CurrentNetworkRootstack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CURRENT_TEMPLATE_BUCKET}" "SSLCertificateID"="${SSLCertificateID}" --stack-name network-stack-${Environment}
       - echo network-stack-${Environment} deploy completed
       - echo getting existing infra-stack template
-      - aws cloudformation get-template --stack-name infra-stack --output json | jq -rc '.TemplateBody' > CurrentInfraRootstack.yaml
+      - aws cloudformation get-template --stack-name test-infra-stack --output json | jq -rc '.TemplateBody' > CurrentInfraRootstack.yaml
       - echo running aws cloudformation command to deploy infra-stack
       - aws cloudformation deploy --no-fail-on-empty-changeset  --template-file ./CurrentInfraRootstack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CURRENT_TEMPLATE_BUCKET}" "SSLCertificateID"="${SSLCertificateID}" --stack-name infra-stack-${Environment}
       - echo infra-stack-${Environment} deploy completed
