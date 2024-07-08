@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: This is a IAM stack which creates neccessary roles and permissions..
+Description: This is a IAM stack which creates neccessary roles and permissions...
 Parameters:
   Environment:
     Type: String
