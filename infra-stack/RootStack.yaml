@@ -1,0 +1,154 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This is a infra stack which deploys VPC, ALB, ECS, CodePipeline, CodeDeploy.
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+      - prod
+      - dev
+      - stage
+      - clone
+  ProjectName:
+    Type: String
+  SSLCertificateID:
+    Type: String
+  StackBucketName:
+    Type: String
+  CodeStarConnectionID:
+    Type: String
+  VPCId:
+    Type: String
+    Description: Required if the environment is a staging
+    Default: "DummyValue"
+  PublicSubnets:
+    Type: CommaDelimitedList
+    Description: Required if the environment is staging
+    Default: "DummyValue"
+  PrivateSubnets:
+    Type: CommaDelimitedList
+    Description: Required if the environment is staging
+    Default: "DummyValue"
+  HTTPSListener1:
+    Type: String
+    Description: Required if the environment is staging
+    Default: "DummyValue"
+  HTTPSListener2:
+    Type: String
+    Description: Required if the environment is staging
+    Default: "DummyValue"
+  SecurityGroup:
+    Type: String
+    Description: Required if the environment is staging
+    Default: "DummyValue"
+    
+Conditions:
+  Staging: !Equals [!Ref Environment, stage]
+  Development: !Equals [!Ref Environment, dev]
+  Production: !Equals [!Ref Environment, prod]
+  Clone: !Equals [!Ref Environment, clone]
+  CreateResource: !Or [!Equals [ !Ref Environment, dev ], !Equals [ !Ref Environment, prod ], !Equals [ !Ref Environment, clone ]]
+
+Resources:
+  TargetGroup:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${StackBucketName}/infra-stack/TargetGroups.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+        VPC: !If
+          - Staging
+          - !Ref VPCId
+          - !ImportValue
+            Fn::Sub: ${ProjectName}-${Environment}-VPC-ID
+        HTTPSListener1: !Ref HTTPSListener1
+        HTTPSListener2: !Ref HTTPSListener2
+        SSLCertificateID: !Ref SSLCertificateID
+ 
+  Loadbalancer:
+    Type: AWS::CloudFormation::Stack
+    Condition: CreateResource
+    DependsOn: TargetGroup
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${StackBucketName}/infra-stack/LoadBalancer.yaml
+      Parameters:
+        VPC: !If
+          - Staging
+          - !Ref VPCId
+          - !ImportValue
+            Fn::Sub: ${ProjectName}-${Environment}-VPC-ID
+        PublicSubnets: !If
+          - Staging
+          - !Ref PublicSubnets
+          - !ImportValue
+            Fn::Sub: ${ProjectName}-${Environment}-PublicSubnets
+        LoadbalancerSecurityGroup: !ImportValue
+          Fn::Sub: ${Environment}-ALBSecurityGroup
+        TargetGroup1: !GetAtt TargetGroup.Outputs.TargetGroup1
+        TargetGroup2: !GetAtt TargetGroup.Outputs.TargetGroup2
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+        SSLCertificateID: !Ref SSLCertificateID
+  
+  ECSCluster:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: Loadbalancer
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${StackBucketName}/infra-stack/ECScluster.yaml
+      Parameters:
+        PrivateSubnets: !If
+          - Staging
+          - !Join [",", !Ref PrivateSubnets]
+          - !ImportValue
+            Fn::Sub: ${ProjectName}-${Environment}-PrivateSubnets
+        ECSSecurityGroup: !If
+          - Staging
+          - !Ref SecurityGroup
+          - !ImportValue
+            Fn::Sub: ${Environment}-ECS-Security-Group
+        TargetGroup1: !GetAtt TargetGroup.Outputs.TargetGroup1
+        TargetGroup2: !GetAtt TargetGroup.Outputs.TargetGroup2
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+    
+
+  CodeDeploy:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: ECSCluster
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${StackBucketName}/infra-stack/CodeDeploy.yaml
+      Parameters:
+        TargetGroup1Name: !GetAtt TargetGroup.Outputs.TargetGroup1Name
+        TargetGroup2Name: !GetAtt TargetGroup.Outputs.TargetGroup2Name
+        ProdListener: !If
+          - Staging
+          - !Ref HTTPSListener1
+          - !GetAtt Loadbalancer.Outputs.ProdListener
+        TestListener: !If
+          - Staging
+          - !Ref HTTPSListener2
+          - !GetAtt Loadbalancer.Outputs.TestListener
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+
+  CodePipeline:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: ECSCluster
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${StackBucketName}/infra-stack/Pipeline.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+        CodeStarConnectionID: !Ref CodeStarConnectionID
+
+  Cloudfront:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: ECSCluster
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${StackBucketName}/infra-stack/Cloudfront.yaml
+      Parameters:
+        Environment: !Ref Environment
+        ProjectName: !Ref ProjectName
+        SSLCertificateID: !Ref SSLCertificateID
+
+

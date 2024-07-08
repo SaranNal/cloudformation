@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  Environment:
+    Type: String
+  ProjectName:
+    Type: String
+  VPC:
+    Type: String
+  SSLCertificateID:
+    Type: String
+  HTTPSListener1:
+    Type: String
+  HTTPSListener2:
+    Type: String
+
+Conditions:
+  Staging: !Equals [!Ref Environment, "stage"]
+
+Resources:
+  TargetGroup1:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${ProjectName}-${Environment}-TG-1
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /healthy
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+
+  TargetGroup2:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${ProjectName}-${Environment}-TG-2
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /healthy
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+
+  HTTPListenerRuleStaging443:
+    # condition only if staging is true
+    Type: "AWS::ElasticLoadBalancingV2::ListenerRule"
+    Condition: Staging
+    Properties:
+      Priority: "4"
+      ListenerArn: !Ref HTTPSListener1
+      Conditions: 
+      - Field: "host-header"
+        Values: 
+        - !Sub "${Environment}.${ProjectName}.com"
+      Actions: 
+      - Type: "forward"
+        TargetGroupArn: !Ref TargetGroup2
+        Order: 1
+        ForwardConfig: 
+          TargetGroups: 
+          - TargetGroupArn: !Ref TargetGroup2
+            Weight: 1
+  
+  HTTPListenerRuleStaging9443:
+    # condition only if staging is true
+    Type: "AWS::ElasticLoadBalancingV2::ListenerRule"
+    Condition: Staging
+    Properties:
+      Priority: "5"
+      ListenerArn: !Ref HTTPSListener2
+      Conditions: 
+      - Field: "host-header"
+        Values: 
+        - !Sub "${Environment}.${ProjectName}.com"
+      Actions: 
+      - Type: "forward"
+        TargetGroupArn: !Ref TargetGroup2
+        Order: 1
+        ForwardConfig: 
+          TargetGroups: 
+          - TargetGroupArn: !Ref TargetGroup2
+            Weight: 1
+  
+Outputs:
+  TargetGroup1:
+    Value: !Ref TargetGroup1
+  TargetGroup2:
+    Value: !Ref TargetGroup2
+  TargetGroup1Name:
+    Value: !GetAtt TargetGroup1.TargetGroupName
+  TargetGroup2Name:
+    Value: !GetAtt TargetGroup2.TargetGroupName

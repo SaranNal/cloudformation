@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: This is a SNS stack which creates notification.
+Parameters:
+  Environment:
+    Type: String
+  ProjectName:
+    Type: String
+Resources:
+  CodeDeploySNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${ProjectName}-${Environment}-notifyCodeDeployStatusToTeams"
+      Subscription:
+        - Endpoint: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}-${Environment}-trackCodeDeployForTeamsUpdate"
+          Protocol: "lambda"
+
+  CodeDeploySNSTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2008-10-17'
+        Statement:
+        - Sid: CodeNotification_publish
+          Effect: Allow
+          Principal:
+            Service: codestar-notifications.amazonaws.com
+          Action: SNS:Publish
+          Resource: !Ref CodeDeploySNSTopic
+      Topics:
+        - !Ref CodeDeploySNSTopic
+
+  #CodepipelineSNSTopic:
+  CodepipelineSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}-${Environment}-notifyCodepipelineEventToTeams"
+          Protocol: "lambda"
+      TopicName: !Sub "${ProjectName}-${Environment}-notifyCodepipelineEventToTeams"
+
+  CodepipelineSNSTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2008-10-17'
+        Statement:
+        - Sid: CodeNotification_publish
+          Effect: Allow
+          Principal:
+            Service: codestar-notifications.amazonaws.com
+          Action: SNS:Publish
+          Resource: !Ref CodepipelineSNSTopic
+      Topics:
+        - !Ref CodepipelineSNSTopic

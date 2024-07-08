@@ -1,0 +1,528 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This stack is for creating cloudfront.
+Parameters:
+  Environment:
+    Type: String
+  ProjectName:
+    Type: String
+  SSLCertificateID:
+    Type: String
+
+Conditions:
+  Production: !Equals [ !Ref Environment, prod ]
+  Development: !Equals [ !Ref Environment, dev ]
+  Staging: !Equals [ !Ref Environment, stage ]
+  Clone: !Equals [ !Ref Environment, clone ]
+  CreateResource: !Or [!Equals [ !Ref Environment, prod ], !Equals [ !Ref Environment, dev ], !Equals [ !Ref Environment, stage ]]
+
+Resources:
+  AdminDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub "${Environment} ADMIN"
+        Aliases:
+          - !If [ Production, !Sub "${ProjectName}.com", !If [ Staging, !Sub "${Environment}-admin.knackforge.com" , !Sub "dev-adminn.knackforge.com" ]]
+        Origins:
+        -
+          ConnectionAttempts: 3
+          ConnectionTimeout: 10
+          CustomOriginConfig:
+            HTTPPort: 80
+            HTTPSPort: 443
+            OriginKeepaliveTimeout: 5
+            OriginProtocolPolicy: "https-only"
+            OriginReadTimeout: 30
+            OriginSSLProtocols:
+            - "TLSv1.2"
+          DomainName: !If [ Production, !Sub "api.${ProjectName}.com", !If [ Staging, !Sub "${Environment}-api.knackforge.com", !Sub "dev-apii.knackforge.com" ]]
+          Id: !Sub "${Environment}api.${ProjectName}.com"
+          OriginPath: ""
+          OriginShield:
+            Enabled: false
+        Enabled: true
+        DefaultRootObject: "/admin/index.html"
+        PriceClass: PriceClass_All
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - "HEAD"
+          - "GET"
+          CachedMethods:
+          - "HEAD"
+          - "GET"
+          Compress: false
+          CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        CacheBehaviors:
+        -
+          AllowedMethods:
+          - "HEAD"
+          - "GET"
+          Compress: true
+          CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+          PathPattern: "/admin/index.html"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        - 
+          AllowedMethods: 
+          - "HEAD"
+          - "GET"
+          Compress: false
+          CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6"
+          PathPattern: "/admin/*"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        CustomErrorResponses:
+        -
+          ErrorCode: 403
+          ResponsePagePath: "/admin/index.html"
+          ResponseCode: 200
+          ErrorCachingMinTTL: 300
+        -
+          ErrorCode: 404
+          ResponsePagePath: "/admin/index.html"
+          ResponseCode: 200
+          ErrorCachingMinTTL: 300
+        ViewerCertificate:
+          AcmCertificateArn: !Sub "arn:aws:acm:us-east-1:${AWS::AccountId}:certificate/${SSLCertificateID}"
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: "none"
+        HttpVersion: "http2"
+        IPV6Enabled: true
+    Condition: CreateResource
+
+  AppDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub "${Environment} APP"
+        Aliases:
+          - !If [ Production, !Sub "${ProjectName}.com", !If [ Staging, !Sub "${Environment}-app.knackforge.com" , !Sub "dev-appp.knackforge.com" ]]
+        Origins:
+        -
+          ConnectionAttempts: 3
+          ConnectionTimeout: 10
+          CustomOriginConfig:
+            HTTPPort: 80
+            HTTPSPort: 443
+            OriginKeepaliveTimeout: 5
+            OriginProtocolPolicy: "https-only"
+            OriginReadTimeout: 30
+            OriginSSLProtocols:
+            - "TLSv1.2"
+          DomainName: !If [ Production, !Sub "api.${ProjectName}.com", !If [ Staging, !Sub "${Environment}-api.knackforge.com", !Sub "dev-apii.knackforge.com" ]]
+          Id: !Sub "${Environment}api.${ProjectName}.com"
+          OriginPath: ""
+          OriginShield:
+            Enabled: false
+        Enabled: true
+        DefaultRootObject: "/app/index.html"
+        PriceClass: PriceClass_All
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - "HEAD"
+          - "GET"
+          CachedMethods:
+          - "HEAD"
+          - "GET"
+          Compress: false
+          CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        CacheBehaviors:
+        -
+          AllowedMethods:
+          - "HEAD"
+          - "GET"
+          Compress: true
+          CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+          PathPattern: "/app/index.html"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        - 
+          AllowedMethods: 
+          - "HEAD"
+          - "GET"
+          Compress: false
+          CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6"
+          PathPattern: "/app/*"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        CustomErrorResponses:
+        -
+          ErrorCode: 403
+          ResponsePagePath: "/app/index.html"
+          ResponseCode: 200
+          ErrorCachingMinTTL: 300
+        -
+          ErrorCode: 404
+          ResponsePagePath: "/app/index.html"
+          ResponseCode: 200
+          ErrorCachingMinTTL: 300
+        ViewerCertificate:
+          AcmCertificateArn: !Sub "arn:aws:acm:us-east-1:${AWS::AccountId}:certificate/${SSLCertificateID}"
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: "none"
+        HttpVersion: "http2"
+        IPV6Enabled: true
+    Condition: CreateResource
+
+  AssetsDistribution:
+    Type: AWS::CloudFront::Distribution
+    Condition: Development
+    Properties:
+      DistributionConfig:
+        Comment: !Sub "${ProjectName} Assets"
+        Aliases:
+          - !Sub "assets.knackforge.com"
+        Origins:
+          - DomainName: !Sub "${ProjectName}-assets.s3.amazonaws.com"
+            Id: !Sub "${ProjectName}-assets.s3.amazonaws.com"
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt AssetsOAC.Id
+            OriginShield:
+              Enabled: false
+          - DomainName: !Sub "${ProjectName}-poi-logo.s3.amazonaws.com"
+            Id: !Sub "${ProjectName}-poi-logo.s3.amazonaws.com"
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt PoiLogoOAC.Id
+            OriginShield:
+              Enabled: false
+        Enabled: true
+        DefaultCacheBehavior:
+          TargetOriginId: !Sub "${ProjectName}-assets.s3.amazonaws.com"
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+        CacheBehaviors:
+          - TargetOriginId: !Sub "${ProjectName}-poi-logo.s3.amazonaws.com"
+            PathPattern: /poi
+            ViewerProtocolPolicy: redirect-to-https
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+        DefaultRootObject: ''
+        PriceClass: PriceClass_All
+        ViewerCertificate:
+          AcmCertificateArn: !Sub "arn:aws:acm:us-east-1:${AWS::AccountId}:certificate/${SSLCertificateID}"
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: "none"
+        HttpVersion: "http1.1"
+        IPV6Enabled: true
+        
+  AssetsOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Condition: Development
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${ProjectName}-assets.s3.amazonaws.com"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  PoiLogoOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Condition: Development
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${ProjectName}-poi-logo.s3.amazonaws.com"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  OACBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: Development
+    Properties:
+      Bucket: !Sub "${ProjectName}-assets"
+      PolicyDocument:
+       Version: '2008-10-17'
+       Id: PolicyForCloudFrontPrivateContent
+       Statement:
+       - Sid: AllowCloudFrontServicePrincipal
+         Effect: Allow
+         Principal:
+           Service: cloudfront.amazonaws.com
+         Action: s3:GetObject
+         Resource: !Sub "arn:aws:s3:::${ProjectName}-assets/*"
+         Condition:
+           StringEquals:
+              AWS:SourceArn: !Join ['', ['arn:aws:cloudfront::', !Ref 'AWS::AccountId' ,':distribution/' , !GetAtt AssetsDistribution.Id]]
+       - Sid: AllowSSLRequestsOnly
+         Effect: Deny
+         Principal: "*"
+         Action: s3:*
+         Resource:
+         - !Sub "arn:aws:s3:::${ProjectName}-assets/*"
+         - !Sub "arn:aws:s3:::${ProjectName}-assets"
+         Condition:
+           Bool:
+             aws:SecureTransport: 'false'
+    DependsOn: AssetsOAC
+
+  #This is test resources and it will be created based on condition
+  TestCloudFrontDistribution1:
+    Type: AWS::CloudFront::Distribution
+    Condition: Clone
+    Properties:
+      DistributionConfig:
+        Comment: !Sub "${Environment} API"
+        Origins:
+        -
+          ConnectionAttempts: 3
+          ConnectionTimeout: 10
+          CustomOriginConfig:
+            HTTPPort: 80
+            HTTPSPort: 443
+            OriginKeepaliveTimeout: 5
+            OriginProtocolPolicy: "https-only"
+            OriginReadTimeout: 30
+            OriginSSLProtocols:
+            - "TLSv1.2"
+          DomainName: !If [ Production, !Sub "api.${ProjectName}.com", !If [ Staging, !Sub "${Environment}-api.knackforge.com", !Sub "${Environment}-apii.knackforge.com" ]]
+          Id: !Sub "${Environment}api.${ProjectName}.com"
+          OriginPath: ""
+          OriginShield:
+            Enabled: false
+        Enabled: true
+        DefaultRootObject: "/admin/index.html"
+        PriceClass: PriceClass_All
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - "HEAD"
+          - "GET"
+          CachedMethods:
+          - "HEAD"
+          - "GET"
+          Compress: false
+          CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        CacheBehaviors:
+        -
+          AllowedMethods:
+          - "HEAD"
+          - "GET"
+          Compress: true
+          CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+          PathPattern: "/admin/index.html"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        - 
+          AllowedMethods: 
+          - "HEAD"
+          - "GET"
+          Compress: false
+          CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6"
+          PathPattern: "/admin/*"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        CustomErrorResponses:
+        -
+          ErrorCode: 403
+          ResponsePagePath: "/admin/index.html"
+          ResponseCode: 200
+          ErrorCachingMinTTL: 300
+        -
+          ErrorCode: 404
+          ResponsePagePath: "/admin/index.html"
+          ResponseCode: 200
+          ErrorCachingMinTTL: 300
+        ViewerCertificate:
+          AcmCertificateArn: !Sub "arn:aws:acm:us-east-1:${AWS::AccountId}:certificate/${SSLCertificateID}"
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: "none"
+        HttpVersion: "http2"
+        IPV6Enabled: true
+  
+  TestCloudFrontDistribution2:
+    Type: AWS::CloudFront::Distribution
+    Condition: Clone
+    Properties:
+      DistributionConfig:
+        Comment: !Sub "${Environment} API"
+        Origins:
+        -
+          ConnectionAttempts: 3
+          ConnectionTimeout: 10
+          CustomOriginConfig:
+            HTTPPort: 80
+            HTTPSPort: 443
+            OriginKeepaliveTimeout: 5
+            OriginProtocolPolicy: "https-only"
+            OriginReadTimeout: 30
+            OriginSSLProtocols:
+            - "TLSv1.2"
+          DomainName: !If [ Production, !Sub "api.${ProjectName}.com", !If [ Staging, !Sub "${Environment}-api.knackforge.com", !Sub "${Environment}-apii.knackforge.com" ]]
+          Id: !Sub "${Environment}api.${ProjectName}.com"
+          OriginPath: ""
+          OriginShield:
+            Enabled: false
+        Enabled: true
+        DefaultRootObject: "/app/index.html"
+        PriceClass: PriceClass_All
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - "HEAD"
+          - "GET"
+          CachedMethods:
+          - "HEAD"
+          - "GET"
+          Compress: false
+          CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        CacheBehaviors:
+        -
+          AllowedMethods:
+          - "HEAD"
+          - "GET"
+          Compress: true
+          CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+          PathPattern: "/app/index.html"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        - 
+          AllowedMethods: 
+          - "HEAD"
+          - "GET"
+          Compress: false
+          CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6"
+          PathPattern: "/app/*"
+          SmoothStreaming: false
+          TargetOriginId: !Sub "${Environment}api.${ProjectName}.com"
+          ViewerProtocolPolicy: "redirect-to-https"
+        CustomErrorResponses:
+        -
+          ErrorCode: 403
+          ResponsePagePath: "/app/index.html"
+          ResponseCode: 200
+          ErrorCachingMinTTL: 300
+        -
+          ErrorCode: 404
+          ResponsePagePath: "/app/index.html"
+          ResponseCode: 200
+          ErrorCachingMinTTL: 300
+        ViewerCertificate:
+          AcmCertificateArn: !Sub "arn:aws:acm:us-east-1:${AWS::AccountId}:certificate/${SSLCertificateID}"
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: "none"
+        HttpVersion: "http2"
+        IPV6Enabled: true
+
+  TestCloudFrontDistribution3:
+    Type: AWS::CloudFront::Distribution
+    Condition: Clone
+    Properties:
+      DistributionConfig:
+        Comment: !Sub "${Environment}-Assets"
+        Origins:
+          - DomainName: !Sub "${ProjectName}-${Environment}-assets.s3.amazonaws.com"
+            Id: !Sub "${ProjectName}-${Environment}-assets.s3.amazonaws.com"
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt TestAssetsOAC.Id
+            OriginShield:
+              Enabled: false
+        Enabled: true
+        DefaultCacheBehavior:
+          TargetOriginId: !Sub "${ProjectName}-${Environment}-assets.s3.amazonaws.com"
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+        DefaultRootObject: ''
+        PriceClass: PriceClass_All
+        ViewerCertificate:
+          AcmCertificateArn: !Sub "arn:aws:acm:us-east-1:${AWS::AccountId}:certificate/${SSLCertificateID}"
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: "none"
+        HttpVersion: "http1.1"
+        IPV6Enabled: true
+
+  TestAssetsOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Condition: Clone
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${ProjectName}-${Environment}-assets.s3.amazonaws.com"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  TestOACBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: Clone
+    Properties:
+      Bucket: !Sub "${ProjectName}-${Environment}-assets"
+      PolicyDocument:
+       Version: '2008-10-17'
+       Id: PolicyForCloudFrontPrivateContent
+       Statement:
+       - Sid: AllowCloudFrontServicePrincipal
+         Effect: Allow
+         Principal:
+           Service: cloudfront.amazonaws.com
+         Action: s3:GetObject
+         Resource: !Sub "arn:aws:s3:::${ProjectName}-${Environment}-assets/*"
+         Condition:
+           StringEquals:
+              AWS:SourceArn: !Join ['', ['arn:aws:cloudfront::', !Ref 'AWS::AccountId' ,':distribution/' , !GetAtt TestCloudFrontDistribution2.Id]]
+       - Sid: AllowSSLRequestsOnly
+         Effect: Deny
+         Principal: "*"
+         Action: s3:*
+         Resource:
+         - !Sub "arn:aws:s3:::${ProjectName}-${Environment}-assets/*"
+         - !Sub "arn:aws:s3:::${ProjectName}-${Environment}-assets"
+         Condition:
+           Bool:
+             aws:SecureTransport: 'false'
+    DependsOn: TestAssetsOAC
+
+    
+
+
+Outputs:
+  AssetsOAC:
+    Value: !GetAtt AssetsOAC.Id
+    Condition: Development
+  CDN1URL:
+    Value: !GetAtt AdminDistribution.DomainName
+    Condition: CreateResource
+  CDN2URL:
+    Value: !GetAtt AppDistribution.DomainName
+    Condition: CreateResource
+  CDN1ID:
+    Value: !GetAtt AdminDistribution.Id
+    Condition: CreateResource
+  CDN2ID:
+    Value: !GetAtt AppDistribution.Id
+    Condition: CreateResource
