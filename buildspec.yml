@@ -2,48 +2,53 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo prebuild phase
+      - echo "Starting pre-build phase"
       - aws --version
       - |
-        if [ ! -d ".git" ]; then
-          echo "Repository not found, cloning...";
+        if [ -d ".git" ]; then
+          echo "Git repository exists, fetching latest changes..."
+          git fetch --all
+          git reset --hard origin/main
+        else
+          echo "Git repository not found, cloning..."
           git clone https://github.com/SaranNal/cloudformation.git .
+          cd cloudformation
         fi
-      - git fetch --unshallow
+      - git fetch --unshallow || true
       - |
-        CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD);
-        echo "Changed files: $CHANGED_FILES";
-        export DEPLOY_HELPER=$(echo "$CHANGED_FILES" | grep -q "helper-stack/") && echo true || echo false;
-        export DEPLOY_NETWORK=$(echo "$CHANGED_FILES" | grep -q "network-stack/") && echo true || echo false;
-        export DEPLOY_INFRA=$(echo "$CHANGED_FILES" | grep -q "infra-stack/") && echo true || echo false;
+        CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+        echo "Changed files: $CHANGED_FILES"
+        export DEPLOY_HELPER=$(echo "$CHANGED_FILES" | grep -q "helper-stack/") && echo true || echo false
+        export DEPLOY_NETWORK=$(echo "$CHANGED_FILES" | grep -q "network-stack/") && echo true || echo false
+        export DEPLOY_INFRA=$(echo "$CHANGED_FILES" | grep -q "infra-stack/") && echo true || echo false
 
   build:
     commands:
       - |
         if [ "$DEPLOY_HELPER" = true ]; then
-          echo "Changes detected in helper-stack. Creating change set...";
-          aws cloudformation create-change-set --stack-name helper-stack-${StackENV} --change-set-name change-set-${RANDOM} --template-body file://CurrentHelperRootstack.yaml --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket} --capabilities CAPABILITY_NAMED_IAM;
-          echo "Helper-stack change set created.";
+          echo "Changes detected in helper-stack. Creating change set..."
+          aws cloudformation create-change-set --stack-name helper-stack-${StackENV} --change-set-name change-set-${RANDOM} --template-body file://CurrentHelperRootstack.yaml --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket} --capabilities CAPABILITY_NAMED_IAM
+          echo "Helper-stack change set created."
         else
-          echo "No changes detected in helper-stack. Skipping change set creation.";
+          echo "No changes detected in helper-stack. Skipping change set creation."
         fi
 
       - |
         if [ "$DEPLOY_NETWORK" = true ]; then
-          echo "Changes detected in network-stack. Creating change set...";
-          aws cloudformation create-change-set --stack-name network-stack-${StackENV} --change-set-name change-set-${RANDOM} --template-body file://CurrentNetworkRootstack.yaml --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID} --capabilities CAPABILITY_NAMED_IAM;
-          echo "Network-stack change set created.";
+          echo "Changes detected in network-stack. Creating change set..."
+          aws cloudformation create-change-set --stack-name network-stack-${StackENV} --change-set-name change-set-${RANDOM} --template-body file://CurrentNetworkRootstack.yaml --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID} --capabilities CAPABILITY_NAMED_IAM
+          echo "Network-stack change set created."
         else
-          echo "No changes detected in network-stack. Skipping change set creation.";
+          echo "No changes detected in network-stack. Skipping change set creation."
         fi
 
       - |
         if [ "$DEPLOY_INFRA" = true ]; then
-          echo "Changes detected in infra-stack. Creating change set...";
-          aws cloudformation create-change-set --stack-name infra-stack-${StackENV} --change-set-name change-set-${RANDOM} --template-body file://CurrentInfraRootstack.yaml --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID} --capabilities CAPABILITY_NAMED_IAM;
-          echo "Infra-stack change set created.";
+          echo "Changes detected in infra-stack. Creating change set..."
+          aws cloudformation create-change-set --stack-name infra-stack-${StackENV} --change-set-name change-set-${RANDOM} --template-body file://CurrentInfraRootstack.yaml --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID} --capabilities CAPABILITY_NAMED_IAM
+          echo "Infra-stack change set created."
         else
-          echo "No changes detected in infra-stack. Skipping change set creation.";
+          echo "No changes detected in infra-stack. Skipping change set creation."
         fi
 
       - echo "Running s3 sync command..."
