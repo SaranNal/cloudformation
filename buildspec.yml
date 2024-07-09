@@ -4,30 +4,27 @@ phases:
     commands:
       - echo prebuild phase
       - aws --version
-      - CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
-      - echo "Changed files: $CHANGED_FILES"
       - |
+        CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD);
+        echo "Changed files: $CHANGED_FILES";
         if echo "$CHANGED_FILES" | grep -q "helper-stack/"; then
-          DEPLOY_HELPER=true;
+          export DEPLOY_HELPER=true;
         else
-          DEPLOY_HELPER=false;
-        fi
-      - |
+          export DEPLOY_HELPER=false;
+        fi;
         if echo "$CHANGED_FILES" | grep -q "network-stack/"; then
-          DEPLOY_NETWORK=true;
+          export DEPLOY_NETWORK=true;
         else
-          DEPLOY_NETWORK=false;
-        fi
-      - |
+          export DEPLOY_NETWORK=false;
+        fi;
         if echo "$CHANGED_FILES" | grep -q "infra-stack/"; then
-          DEPLOY_INFRA=true;
+          export DEPLOY_INFRA=true;
         else
-          DEPLOY_INFRA=false;
+          export DEPLOY_INFRA=false;
         fi
 
   build:
     commands:
-      # Deploy helper-stack if changes are detected
       - |
         if [ "$DEPLOY_HELPER" = true ]; then
           echo "Changes detected in helper-stack. Deploying helper-stack...";
@@ -41,7 +38,6 @@ phases:
           echo "No changes detected in helper-stack. Skipping helper-stack deployment.";
         fi
 
-      # Deploy network-stack if changes are detected
       - |
         if [ "$DEPLOY_NETWORK" = true ]; then
           echo "Changes detected in network-stack. Deploying network-stack...";
@@ -55,7 +51,6 @@ phases:
           echo "No changes detected in network-stack. Skipping network-stack deployment.";
         fi
 
-      # Deploy infra-stack if changes are detected
       - |
         if [ "$DEPLOY_INFRA" = true ]; then
           echo "Changes detected in infra-stack. Deploying infra-stack...";
