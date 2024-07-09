@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: This is a helper stack which creates resources like S3, SNS, IAM, ECR.
+Description: This is a helper stack which creates resources like S3, SNS, IAM, ECR..
 Parameters:
   Environment:
     Type: String
