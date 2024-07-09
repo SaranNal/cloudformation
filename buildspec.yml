@@ -4,6 +4,11 @@ phases:
     commands:
       - echo prebuild phase
       - aws --version
+      - |
+        if [ ! -d ".git" ]; then
+          echo "Repository not found, cloning...";
+          git clone https://github.com/SaranNal/cloudformation.git .
+        fi
       - git fetch --unshallow
       - |
         CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD);
