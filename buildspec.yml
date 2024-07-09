@@ -6,11 +6,30 @@ phases:
       - aws --version
       - CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
       - echo "Changed files: $CHANGED_FILES"
+      - |
+        if echo "$CHANGED_FILES" | grep -q "helper-stack/"; then
+          DEPLOY_HELPER=true;
+        else
+          DEPLOY_HELPER=false;
+        fi
+      - |
+        if echo "$CHANGED_FILES" | grep -q "network-stack/"; then
+          DEPLOY_NETWORK=true;
+        else
+          DEPLOY_NETWORK=false;
+        fi
+      - |
+        if echo "$CHANGED_FILES" | grep -q "infra-stack/"; then
+          DEPLOY_INFRA=true;
+        else
+          DEPLOY_INFRA=false;
+        fi
 
   build:
     commands:
-      # Check and deploy helper-stack if changes are detected
-      - if [[ "$CHANGED_FILES" == *"helper-stack"* ]]; then
+      # Deploy helper-stack if changes are detected
+      - |
+        if [ "$DEPLOY_HELPER" = true ]; then
           echo "Changes detected in helper-stack. Deploying helper-stack...";
           echo getting existing helper-stack template;
           aws cloudformation get-template --stack-name helper-stack-${CURRENT_STACK_ENV} --output json | jq -rc '.TemplateBody' > CurrentHelperRootstack.yaml;
@@ -22,8 +41,9 @@ phases:
           echo "No changes detected in helper-stack. Skipping helper-stack deployment.";
         fi
 
-      # Check and deploy network-stack if changes are detected
-      - if [[ "$CHANGED_FILES" == *"network-stack"* ]]; then
+      # Deploy network-stack if changes are detected
+      - |
+        if [ "$DEPLOY_NETWORK" = true ]; then
           echo "Changes detected in network-stack. Deploying network-stack...";
           echo getting existing network-stack template;
           aws cloudformation get-template --stack-name network-stack-${CURRENT_STACK_ENV} --output json | jq -rc '.TemplateBody' > CurrentNetworkRootstack.yaml;
@@ -35,8 +55,9 @@ phases:
           echo "No changes detected in network-stack. Skipping network-stack deployment.";
         fi
 
-      # Check and deploy infra-stack if changes are detected
-      - if [[ "$CHANGED_FILES" == *"infra-stack"* ]]; then
+      # Deploy infra-stack if changes are detected
+      - |
+        if [ "$DEPLOY_INFRA" = true ]; then
           echo "Changes detected in infra-stack. Deploying infra-stack...";
           echo getting existing infra-stack template;
           aws cloudformation get-template --stack-name infra-stack-${CURRENT_STACK_ENV} --output json | jq -rc '.TemplateBody' > CurrentInfraRootstack.yaml;
@@ -50,6 +71,7 @@ phases:
 
       - echo running s3 sync command
       - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec-stack-update.yml" --exclude "buildspec.yml" --exclude "CurrentHelperRootstack.yaml" --exclude "CurrentNetworkRootstack.yaml" --exclude "CurrentInfraRootstack.yaml" --exclude ".gitignore"
+
 artifacts:
   files:
     - "**/*"
