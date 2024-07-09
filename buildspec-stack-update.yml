@@ -1,0 +1,44 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - echo prebuild phase
+      - aws --version
+      - CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+      - echo "Changed files: $CHANGED_FILES"
+
+  build:
+    commands:
+      # Check and deploy helper-stack if changes are detected
+      - if [[ "$CHANGED_FILES" == *"helper-stack"* ]]; then
+          echo "Changes detected in helper-stack. Deploying helper-stack...";
+          aws cloudformation deploy --no-fail-on-empty-changeset --template-file helper-stack/RootStack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CLONE_TEMPLATE_BUCKET}" "S3LogBucket"="${S3LogBucket}" --stack-name helper-stack-${StackENV};
+          echo helper-stack deploy completed;
+        else
+          echo "No changes detected in helper-stack. Skipping helper-stack deployment.";
+        fi
+
+      # Check and deploy network-stack if changes are detected
+      - if [[ "$CHANGED_FILES" == *"network-stack"* ]]; then
+          echo "Changes detected in network-stack. Deploying network-stack...";
+          aws cloudformation deploy --no-fail-on-empty-changeset --template-file network-stack/RootStack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CLONE_TEMPLATE_BUCKET}" "SSLCertificateID"="${SSLCertificateID}" --stack-name network-stack-${StackENV};
+          echo network-stack deploy completed;
+        else
+          echo "No changes detected in network-stack. Skipping network-stack deployment.";
+        fi
+
+      # Check and deploy infra-stack if changes are detected
+      - if [[ "$CHANGED_FILES" == *"infra-stack"* ]]; then
+          echo "Changes detected in infra-stack. Deploying infra-stack...";
+          aws cloudformation deploy --no-fail-on-empty-changeset --template-file infra-stack/RootStack.yaml --capabilities=CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName"="${ProjectName}" "CodeStarConnectionID"="${CodeStarConnectionID}" "StackBucketName"="${CLONE_TEMPLATE_BUCKET}" "SSLCertificateID"="${SSLCertificateID}" --stack-name infra-stack-${StackENV};
+          echo infra-stack deploy completed;
+        else
+          echo "No changes detected in infra-stack. Skipping infra-stack deployment.";
+        fi
+
+      - echo running s3 sync command
+      - aws s3 sync ./ s3://${CURRENT_TEMPLATE_BUCKET}/ --exclude "buildspec-stack-update.yml" --exclude "buildspec.yml" --exclude ".*"
+
+artifacts:
+  files:
+    - "**/*"
