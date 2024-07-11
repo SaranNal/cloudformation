@@ -22,7 +22,7 @@ phases:
           aws cloudformation create-change-set --stack-name helper-stack-${CURRENT_STACK_ENV} --template-body file://templates/helper-stack.yaml --change-set-name $CHANGE_SET_NAME --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket};
           aws cloudformation wait change-set-create-complete --change-set-name $CHANGE_SET_NAME;
           aws cloudformation describe-change-set --change-set-name $CHANGE_SET_NAME;
-          # aws cloudformation execute-change-set --change-set-name $CHANGE_SET_NAME;
+      # -  # aws cloudformation execute-change-set --change-set-name $CHANGE_SET_NAME;
         else
           echo no changes detected for helper-stack;
         fi
@@ -37,7 +37,7 @@ phases:
           aws cloudformation create-change-set --stack-name network-stack-${CURRENT_STACK_ENV} --template-body file://templates/network-stack.yaml --change-set-name $CHANGE_SET_NAME --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID};
           aws cloudformation wait change-set-create-complete --change-set-name $CHANGE_SET_NAME;
           aws cloudformation describe-change-set --change-set-name $CHANGE_SET_NAME;
-          # aws cloudformation execute-change-set --change-set-name $CHANGE_SET_NAME;
+      # -    # aws cloudformation execute-change-set --change-set-name $CHANGE_SET_NAME;
         else
           echo no changes detected for network-stack;
         fi
@@ -52,7 +52,7 @@ phases:
           aws cloudformation create-change-set --stack-name infra-stack-${CURRENT_STACK_ENV} --template-body file://templates/infra-stack.yaml --change-set-name $CHANGE_SET_NAME --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID};
           aws cloudformation wait change-set-create-complete --change-set-name $CHANGE_SET_NAME;
           aws cloudformation describe-change-set --change-set-name $CHANGE_SET_NAME;
-          # aws cloudformation execute-change-set --change-set-name $CHANGE_SET_NAME;
+      # -    # aws cloudformation execute-change-set --change-set-name $CHANGE_SET_NAME;
         else
           echo no changes detected for infra-stack;
         fi
