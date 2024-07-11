@@ -16,7 +16,7 @@ phases:
       - aws cloudformation get-template --stack-name helper-stack-${CURRENT_STACK_ENV} --output json | jq -rc '.TemplateBody' > CurrentHelperRootstack.yaml
       - cat CurrentHelperRootstack.yaml
       - echo running aws cloudformation command to deploy helper-stack
-      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file ./CurrentHelperRootstack.yaml --capabilities CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName=${ProjectName}" "CodeStarConnectionID=${CodeStarConnectionID}" "S3LogBucket=${S3LogBucket}" --stack-name helper-stack-${StackENV}
+      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file ./CurrentHelperRootstack.yaml --capabilities CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName=${ProjectName}" "CodeStarConnectionID=${CodeStarConnectionID}" "StackBucketName=${StackBucketName}" "S3LogBucket=${S3LogBucket}" --stack-name helper-stack-${StackENV}
       - echo helper-stack-${StackENV} deploy completed
 
       - echo getting existing network-stack template
