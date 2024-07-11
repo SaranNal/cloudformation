@@ -1,58 +1,40 @@
 version: 0.2
+
+env:
+  variables:
+    AWS_REGION: us-west-2
+
 phases:
   pre_build:
     commands:
-      - echo "Starting pre-build phase"
+      - echo prebuild phase
       - aws --version
-      - |
-        if [ -d ".git" ]; then
-          echo "Git repository exists, fetching latest changes..."
-          git fetch --all
-          git reset --hard origin/main
-        else
-          echo "Git repository not found, cloning..."
-          git clone https://github.com/SaranNal/cloudformation.git .
-          cd cloudformation
-        fi
-      - git fetch --unshallow || true
-      - |
-        CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
-        echo "Changed files: $CHANGED_FILES"
-        export DEPLOY_HELPER=$(echo "$CHANGED_FILES" | grep -q "helper-stack/") && echo true || echo false
-        export DEPLOY_NETWORK=$(echo "$CHANGED_FILES" | grep -q "network-stack/") && echo true || echo false
-        export DEPLOY_INFRA=$(echo "$CHANGED_FILES" | grep -q "infra-stack/") && echo true || echo false
 
   build:
     commands:
-      - |
-        if [ "$DEPLOY_HELPER" = true ]; then
-          echo "Changes detected in helper-stack. Creating change set..."
-          aws cloudformation create-change-set --stack-name helper-stack-${StackENV} --change-set-name change-set-${RANDOM} --template-body file://CurrentHelperRootstack.yaml --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket} --capabilities CAPABILITY_NAMED_IAM
-          echo "Helper-stack change set created."
-        else
-          echo "No changes detected in helper-stack. Skipping change set creation."
-        fi
+      - echo getting existing helper-stack template
+      - aws cloudformation get-template --stack-name helper-stack-${CURRENT_STACK_ENV} --output json | jq -rc '.TemplateBody' > CurrentHelperRootstack.yaml
+      - cat CurrentHelperRootstack.yaml
+      - echo running aws cloudformation command to deploy helper-stack
+      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file ./CurrentHelperRootstack.yaml --capabilities CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName=${ProjectName}" "CodeStarConnectionID=${CodeStarConnectionID}" "S3LogBucket=${S3LogBucket}" --stack-name helper-stack-${StackENV}
+      - echo helper-stack-${StackENV} deploy completed
 
-      - |
-        if [ "$DEPLOY_NETWORK" = true ]; then
-          echo "Changes detected in network-stack. Creating change set..."
-          aws cloudformation create-change-set --stack-name network-stack-${StackENV} --change-set-name change-set-${RANDOM} --template-body file://CurrentNetworkRootstack.yaml --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID} --capabilities CAPABILITY_NAMED_IAM
-          echo "Network-stack change set created."
-        else
-          echo "No changes detected in network-stack. Skipping change set creation."
-        fi
+      - echo getting existing network-stack template
+      - aws cloudformation get-template --stack-name network-stack-${CURRENT_STACK_ENV} --output json | jq -rc '.TemplateBody' > CurrentNetworkRootstack.yaml
+      - cat CurrentNetworkRootstack.yaml
+      - echo running aws cloudformation command to deploy network-stack
+      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file ./CurrentNetworkRootstack.yaml --capabilities CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName=${ProjectName}" "CodeStarConnectionID=${CodeStarConnectionID}" "SSLCertificateID=${SSLCertificateID}" --stack-name network-stack-${StackENV}
+      - echo network-stack-${StackENV} deploy completed
 
-      - |
-        if [ "$DEPLOY_INFRA" = true ]; then
-          echo "Changes detected in infra-stack. Creating change set..."
-          aws cloudformation create-change-set --stack-name infra-stack-${StackENV} --change-set-name change-set-${RANDOM} --template-body file://CurrentInfraRootstack.yaml --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID} --capabilities CAPABILITY_NAMED_IAM
-          echo "Infra-stack change set created."
-        else
-          echo "No changes detected in infra-stack. Skipping change set creation."
-        fi
+      - echo getting existing infra-stack template
+      - aws cloudformation get-template --stack-name infra-stack-${CURRENT_STACK_ENV} --output json | jq -rc '.TemplateBody' > CurrentInfraRootstack.yaml
+      - cat CurrentInfraRootstack.yaml
+      - echo running aws cloudformation command to deploy infra-stack
+      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file ./CurrentInfraRootstack.yaml --capabilities CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName=${ProjectName}" "CodeStarConnectionID=${CodeStarConnectionID}" "SSLCertificateID=${SSLCertificateID}" --stack-name infra-stack-${StackENV}
+      - echo infra-stack-${StackENV} deploy completed
 
-      - echo "Running s3 sync command..."
-      - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec-stack-update.yml" --exclude "buildspec.yml" --exclude "CurrentHelperRootstack.yaml" --exclude "CurrentNetworkRootstack.yaml" --exclude "CurrentInfraRootstack.yaml" --exclude ".gitignore"
+      # - echo running s3 sync command
+      # - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec-stack-update.yml" --exclude "buildspec.yml" --exclude "CurrentHelperRootstack.yaml" --exclude "CurrentNetworkRootstack.yaml" --exclude "CurrentInfraRootstack.yaml" --exclude ".gitignore"
 
 artifacts:
   files:
