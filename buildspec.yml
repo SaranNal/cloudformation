@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    AWS_REGION: us-west-2
+    AWS_REGION: us-east-1
 
 phases:
   pre_build:
@@ -15,23 +15,47 @@ phases:
       - echo getting existing helper-stack template
       - aws cloudformation get-template --stack-name helper-stack-${CURRENT_STACK_ENV} --output json | jq -rc '.TemplateBody' > CurrentHelperRootstack.yaml
       - cat CurrentHelperRootstack.yaml
-      - echo running aws cloudformation command to deploy helper-stack
-      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file ./CurrentHelperRootstack.yaml --capabilities CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName=${ProjectName}" "CodeStarConnectionID=${CodeStarConnectionID}" "StackBucketName=${StackBucketName}" "S3LogBucket=${S3LogBucket}" --stack-name helper-stack-${StackENV}
-      - echo helper-stack-${StackENV} deploy completed
+      - echo comparing helper-stack template
+      - if ! diff -q CurrentHelperRootstack.yaml cloudformation/helper-stack.yaml; then
+          echo creating change set for helper-stack;
+          CHANGE_SET_NAME="change-set-helper-stack-${RANDOM}";
+          aws cloudformation create-change-set --stack-name helper-stack-${CURRENT_STACK_ENV} --template-body file://templates/helper-stack.yaml --change-set-name $CHANGE_SET_NAME --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket};
+          aws cloudformation wait change-set-create-complete --change-set-name $CHANGE_SET_NAME;
+          aws cloudformation describe-change-set --change-set-name $CHANGE_SET_NAME;
+          # aws cloudformation execute-change-set --change-set-name $CHANGE_SET_NAME;
+        else
+          echo no changes detected for helper-stack;
+        fi
 
       - echo getting existing network-stack template
       - aws cloudformation get-template --stack-name network-stack-${CURRENT_STACK_ENV} --output json | jq -rc '.TemplateBody' > CurrentNetworkRootstack.yaml
       - cat CurrentNetworkRootstack.yaml
-      - echo running aws cloudformation command to deploy network-stack
-      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file ./CurrentNetworkRootstack.yaml --capabilities CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName=${ProjectName}" "CodeStarConnectionID=${CodeStarConnectionID}" "SSLCertificateID=${SSLCertificateID}" --stack-name network-stack-${StackENV}
-      - echo network-stack-${StackENV} deploy completed
+      - echo comparing network-stack template
+      - if ! diff -q CurrentNetworkRootstack.yaml cloudformation/network-stack.yaml; then
+          echo creating change set for network-stack;
+          CHANGE_SET_NAME="change-set-network-stack-${RANDOM}";
+          aws cloudformation create-change-set --stack-name network-stack-${CURRENT_STACK_ENV} --template-body file://templates/network-stack.yaml --change-set-name $CHANGE_SET_NAME --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID};
+          aws cloudformation wait change-set-create-complete --change-set-name $CHANGE_SET_NAME;
+          aws cloudformation describe-change-set --change-set-name $CHANGE_SET_NAME;
+          # aws cloudformation execute-change-set --change-set-name $CHANGE_SET_NAME;
+        else
+          echo no changes detected for network-stack;
+        fi
 
       - echo getting existing infra-stack template
       - aws cloudformation get-template --stack-name infra-stack-${CURRENT_STACK_ENV} --output json | jq -rc '.TemplateBody' > CurrentInfraRootstack.yaml
       - cat CurrentInfraRootstack.yaml
-      - echo running aws cloudformation command to deploy infra-stack
-      - aws cloudformation deploy --no-fail-on-empty-changeset --template-file ./CurrentInfraRootstack.yaml --capabilities CAPABILITY_NAMED_IAM --disable-rollback --parameter-overrides "Environment"="${Environment}" "ProjectName=${ProjectName}" "CodeStarConnectionID=${CodeStarConnectionID}" "SSLCertificateID=${SSLCertificateID}" --stack-name infra-stack-${StackENV}
-      - echo infra-stack-${StackENV} deploy completed
+      - echo comparing infra-stack template
+      - if ! diff -q CurrentInfraRootstack.yaml cloudformation/infra-stack.yaml; then
+          echo creating change set for infra-stack;
+          CHANGE_SET_NAME="change-set-infra-stack-${RANDOM}";
+          aws cloudformation create-change-set --stack-name infra-stack-${CURRENT_STACK_ENV} --template-body file://templates/infra-stack.yaml --change-set-name $CHANGE_SET_NAME --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CURRENT_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID};
+          aws cloudformation wait change-set-create-complete --change-set-name $CHANGE_SET_NAME;
+          aws cloudformation describe-change-set --change-set-name $CHANGE_SET_NAME;
+          # aws cloudformation execute-change-set --change-set-name $CHANGE_SET_NAME;
+        else
+          echo no changes detected for infra-stack;
+        fi
 
       # - echo running s3 sync command
       # - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec-stack-update.yml" --exclude "buildspec.yml" --exclude "CurrentHelperRootstack.yaml" --exclude "CurrentNetworkRootstack.yaml" --exclude "CurrentInfraRootstack.yaml" --exclude ".gitignore"
