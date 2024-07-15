@@ -7,7 +7,7 @@ phases:
   build:
     commands:
       - echo running aws cloudformation command to deploy helper-stack
-      - aws cloudformation create-change-set --stack-name helper-stack-${StackENV} --template-body file://helper-stack/RootStack.yaml --change-set-name helper-stack-changeset --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket}
+      - aws cloudformation create-change-set --stack-name helper-stack-${StackENV} --template-body file://helper-stack/RootStack.yaml --change-set-name helper-stack-changeset --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}
       - aws cloudformation wait change-set-create-complete --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
       # - aws cloudformation execute-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset --no-execute-unless
       - echo helper-stack deploy completed
