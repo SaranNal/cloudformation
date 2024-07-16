@@ -6,6 +6,9 @@ phases:
       - aws --version
   build:
     commands:
+      - echo running s3 sync command
+      - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec-stack-update.yml" --exclude "buildspec.yml" --exclude "CurrentHelperRootstack.yaml" --exclude "CurrentNetworkRootstack.yaml" --exclude "CurrentInfraRootstack.yaml" --exclude ".gitignore"
+     
       - echo running aws cloudformation command to deploy helper-stack
       - aws cloudformation create-change-set --stack-name helper-stack-${StackENV} --template-body file://helper-stack/RootStack.yaml --change-set-name helper-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket}
       - aws cloudformation wait change-set-create-complete --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
@@ -24,8 +27,8 @@ phases:
       - aws cloudformation describe-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset
       - echo infra-stack deploy completed
 
-      - echo running s3 sync command
-      - aws s3 sync ./ s3://${CURRENT_TEMPLATE_BUCKET}/ --exclude "buildspec-stack-update.yml" --exclude "buildspec.yml" --exclude ".*"
+      # - echo running s3 sync command
+      # - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec-stack-update.yml" --exclude "buildspec.yml" --exclude "CurrentHelperRootstack.yaml" --exclude "CurrentNetworkRootstack.yaml" --exclude "CurrentInfraRootstack.yaml" --exclude ".gitignore"
 artifacts:
   files:
     - "**/*"
