@@ -17,11 +17,12 @@ phases:
           echo "Updating helper-stack..."
           aws cloudformation create-change-set --stack-name helper-stack-${StackENV} --template-body file://helper-stack/RootStack.yaml --change-set-name helper-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket}
           aws cloudformation wait change-set-create-complete --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
-          aws cloudformation execute-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
+          aws cloudformation describe-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
         else
           echo "Creating helper-stack..."
           aws cloudformation create-stack --stack-name helper-stack-${StackENV} --template-body file://helper-stack/RootStack.yaml --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket}
           aws cloudformation wait stack-create-complete --stack-name helper-stack-${StackENV}
+          aws cloudformation describe-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
         fi
 
       # Check and deploy/update network-stack if changes are detected
@@ -31,11 +32,13 @@ phases:
           echo "Updating network-stack..."
           aws cloudformation create-change-set --stack-name network-stack-${StackENV} --template-body file://network-stack/RootStack.yaml --change-set-name network-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}
           aws cloudformation wait change-set-create-complete --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset
-          aws cloudformation execute-change-set --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset
+          aws cloudformation describe-change-set --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset
         else
           echo "Creating network-stack..."
           aws cloudformation create-stack --stack-name network-stack-${StackENV} --template-body file://network-stack/RootStack.yaml --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}
           aws cloudformation wait stack-create-complete --stack-name network-stack-${StackENV}
+          aws cloudformation describe-change-set --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset
+          
         fi
 
       # Check and deploy/update infra-stack if changes are detected
@@ -45,11 +48,12 @@ phases:
           echo "Updating infra-stack..."
           aws cloudformation create-change-set --stack-name infra-stack-${StackENV} --template-body file://infra-stack/RootStack.yaml --change-set-name infra-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}
           aws cloudformation wait change-set-create-complete --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset
-          aws cloudformation execute-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset
+          aws cloudformation describe-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset
         else
           echo "Creating infra-stack..."
           aws cloudformation create-stack --stack-name infra-stack-${StackENV} --template-body file://infra-stack/RootStack.yaml --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}
           aws cloudformation wait stack-create-complete --stack-name infra-stack-${StackENV}
+          aws cloudformation describe-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset
         fi
 
 artifacts:
