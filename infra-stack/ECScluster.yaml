@@ -74,6 +74,12 @@ Resources:
           PortMappings:
             - ContainerPort: 80
               Protocol: tcp
+          HealthCheck:
+            Command:
+              - 'CMD-SHELL'
+              - 'echo "healthy"'
+            Interval: 30
+            Timeout: 5
           LogConfiguration:
             LogDriver: awslogs
             Options:
