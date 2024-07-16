@@ -161,7 +161,7 @@ Resources:
         CustomErrorResponses:
         -
           ErrorCode: 403
-          ResponsePagePath: "/app/index.html"
+          ResponsePagePath: "/admin/index.html"
           ResponseCode: 200
           ErrorCachingMinTTL: 300
         -
