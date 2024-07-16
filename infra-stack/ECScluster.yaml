@@ -74,12 +74,12 @@ Resources:
           PortMappings:
             - ContainerPort: 80
               Protocol: tcp
-          HealthCheck:
-            Command:
-              - 'CMD-SHELL'
-              - 'echo "healthy"'
-            Interval: 30
-            Timeout: 5
+          # HealthCheck:
+          #   Command:
+          #     - 'CMD-SHELL'
+          #     - 'echo "healthy"'
+          #   Interval: 30
+          #   Timeout: 5
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -155,7 +155,7 @@ Resources:
       Unit: "Percent"
       EvaluationPeriods: 1
       DatapointsToAlarm: 1
-      Threshold: 40
+      Threshold: 30
       ComparisonOperator: "GreaterThanOrEqualToThreshold"
   ApplicationAutoScalingScalableTarget:
     Type: "AWS::ApplicationAutoScaling::ScalableTarget"
