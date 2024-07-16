@@ -187,7 +187,7 @@ Resources:
       DistributionConfig:
         Comment: !Sub "${ProjectName} Assets"
         Aliases:
-          - !Sub "assets.knackforge.com"
+          - !Sub "testassets.knackforge.com"
         Origins:
           - DomainName: !Sub "${ProjectName}-assets.s3.amazonaws.com"
             Id: !Sub "${ProjectName}-assets.s3.amazonaws.com"
