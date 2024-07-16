@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: This stack is for creating cloudfront.
+Description: This stack is for creating cloudfront...
 Parameters:
   Environment:
     Type: String
