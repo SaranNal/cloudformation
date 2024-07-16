@@ -16,13 +16,13 @@ phases:
       - echo helper-stack deploy completed
 
       - echo running aws cloudformation command to deploy network-stack
-      - aws cloudformation create-change-set --stack-name network-stack-${StackENV} --template-body file://network-stack/RootStack.yaml --change-set-name network-stack-changeset --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}
+      - aws cloudformation create-change-set --stack-name network-stack-${StackENV} --template-body file://network-stack/RootStack.yaml --change-set-name network-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}
       - aws cloudformation wait change-set-create-complete --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset
       - aws cloudformation describe-change-set --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset
       - echo network-stack deploy completed
 
       - echo running aws cloudformation command to deploy infra-stack
-      - aws cloudformation create-change-set --stack-name infra-stack-${StackENV} --template-body file://infra-stack/RootStack.yaml --change-set-name infra-stack-changeset --capabilities CAPABILITY_NAMED_IAM --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}
+      - aws cloudformation create-change-set --stack-name infra-stack-${StackENV} --template-body file://infra-stack/RootStack.yaml --change-set-name infra-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}
       - aws cloudformation wait change-set-create-complete --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset
       - aws cloudformation describe-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset
       - echo infra-stack deploy completed
