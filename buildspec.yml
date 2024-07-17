@@ -39,8 +39,8 @@ phases:
             echo "Change set status for helper-stack: ${STATUS}"
             notify_teams "Helper stack" "${STATUS}"
             fi
-        else
-          echo "helper-stack-${StackENV} does not exist"
+        # else
+        #   echo "helper-stack-${StackENV} does not exist"
         fi
 
       - echo "Checking changes for network-stack"
@@ -50,10 +50,11 @@ phases:
           aws cloudformation create-change-set --stack-name network-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml --change-set-name network-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}
 
           STATUS=$(aws cloudformation describe-change-set --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset --query 'Status' --output text)
-          echo "Change set status for network-stack: ${STATUS}"
-          notify_teams "Network stack" "${STATUS}"
-        else
-          echo "network-stack-${StackENV} does not exist"
+            if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
+            echo "Change set status for network-stack: ${STATUS}"
+            notify_teams "Network stack" "${STATUS}"
+        # else
+        #   echo "network-stack-${StackENV} does not exist"
         fi
 
       - echo "Checking changes for infra-stack"
@@ -63,10 +64,11 @@ phases:
           aws cloudformation create-change-set --stack-name infra-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml --change-set-name infra-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}
 
           STATUS=$(aws cloudformation describe-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset --query 'Status' --output text)
-          echo "Change set status for infra-stack: ${STATUS}"
-          notify_teams "Infra stack" "${STATUS}"
-        else
-          echo "infra-stack-${StackENV} does not exist"
+            if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
+            echo "Change set status for infra-stack: ${STATUS}"
+            notify_teams "Infra stack" "${STATUS}"
+        # else
+        #   echo "infra-stack-${StackENV} does not exist"
         fi
 
 artifacts:
