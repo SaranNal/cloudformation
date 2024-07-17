@@ -91,7 +91,6 @@ phases:
               echo "PAYLOAD: ${PAYLOAD}"
 
               curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
-          }
 
 artifacts:
   files:
