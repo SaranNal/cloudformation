@@ -51,7 +51,6 @@ phases:
 
       # Function to send notification to Microsoft Teams
       - |
-        notify_teams() {
           STACK_NAME="Test-stack"
           STATUS=$STATUS
           MESSAGE="There are some changes occurred in ${STACK_NAME}. Please review and approve to execute."
@@ -64,7 +63,7 @@ phases:
           echo "PAYLOAD: ${PAYLOAD}"
 
           curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
-        }
+        
 
 
 artifacts:
