@@ -18,7 +18,7 @@ phases:
         if  aws cloudformation describe-stacks --stack-name helper-stack-${StackENV} >/dev/null 2>&1; then
             echo "Updating helper-stack..."
             aws cloudformation create-change-set --stack-name helper-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml --change-set-name helper-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket}
-
+            aws cloudformation wait create-change-set-complete --stack-name helper-stack-${StackENV}
             STATUS=$(aws cloudformation describe-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset --query 'Status' --output text)
             echo $STATUS
             if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
@@ -34,39 +34,39 @@ phases:
             fi
         fi
 
-      - echo "Checking changes for network-stack"
-      - |
-        if aws cloudformation describe-stacks --stack-name network-stack-${StackENV} >/dev/null 2>&1; then
-          echo "Updating network-stack..."
-          aws cloudformation create-change-set --stack-name network-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml --change-set-name network-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}
+      # - echo "Checking changes for network-stack"
+      # - |
+      #   if aws cloudformation describe-stacks --stack-name network-stack-${StackENV} >/dev/null 2>&1; then
+      #     echo "Updating network-stack..."
+      #     aws cloudformation create-change-set --stack-name network-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml --change-set-name network-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}
 
-          STATUS=$(aws cloudformation describe-change-set --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset --query 'Status' --output text)
-          if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-              MESSAGE="Some new changes have been occurred in ${STACK_NAME}. Please review and approve to execute."
-              PAYLOAD="{\"text\": \"${MESSAGE} Status: ${STATUS}. CloudFormation Stack URL: ${STACK_URL}\"}"
-              echo "Sending notification to Microsoft Teams: ${MESSAGE}"
-              curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
-          elif [ "${STATUS}" == "FAILED" ]; then
-              MESSAGE="No changes detected in ${STACK_NAME} and if the changeset is in failed state the message should through no changes detected in ${STACK_NAME}."
-              PAYLOAD="{\"text\": \"${MESSAGE} Status: ${STATUS}. CloudFormation Stack URL: ${STACK_URL}\"}"
-              echo "Sending notification to Microsoft Teams: ${MESSAGE}"
-              curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
-          fi
-        fi
+      #     STATUS=$(aws cloudformation describe-change-set --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset --query 'Status' --output text)
+      #     if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
+      #         MESSAGE="Some new changes have been occurred in ${STACK_NAME}. Please review and approve to execute."
+      #         PAYLOAD="{\"text\": \"${MESSAGE} Status: ${STATUS}. CloudFormation Stack URL: ${STACK_URL}\"}"
+      #         echo "Sending notification to Microsoft Teams: ${MESSAGE}"
+      #         curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
+      #     elif [ "${STATUS}" == "FAILED" ]; then
+      #         MESSAGE="No changes detected in ${STACK_NAME} and if the changeset is in failed state the message should through no changes detected in ${STACK_NAME}."
+      #         PAYLOAD="{\"text\": \"${MESSAGE} Status: ${STATUS}. CloudFormation Stack URL: ${STACK_URL}\"}"
+      #         echo "Sending notification to Microsoft Teams: ${MESSAGE}"
+      #         curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
+      #     fi
+      #   fi
 
-      - echo "Checking changes for infra-stack"
-      - |
-        if aws cloudformation describe-stacks --stack-name infra-stack-${StackENV} >/dev/null 2>&1; then
-          echo "Updating infra-stack..."
-          aws cloudformation create-change-set --stack-name infra-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml --change-set-name infra-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}
+      # - echo "Checking changes for infra-stack"
+      # - |
+      #   if aws cloudformation describe-stacks --stack-name infra-stack-${StackENV} >/dev/null 2>&1; then
+      #     echo "Updating infra-stack..."
+      #     aws cloudformation create-change-set --stack-name infra-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml --change-set-name infra-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}
 
-          STATUS=$(aws cloudformation describe-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset --query 'Status' --output text)
-            if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-            echo "Change set status for infra-stack: ${STATUS}"
-            notify_teams "Infra stack" "${STATUS}"
-        # else
-        #   echo "infra-stack-${StackENV} does not exist"
-        fi
+      #     STATUS=$(aws cloudformation describe-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset --query 'Status' --output text)
+      #       if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
+      #       echo "Change set status for infra-stack: ${STATUS}"
+      #       notify_teams "Infra stack" "${STATUS}"
+      #   # else
+      #   #   echo "infra-stack-${StackENV} does not exist"
+      #   fi
 
 artifacts:
   files:
