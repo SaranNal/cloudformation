@@ -12,16 +12,17 @@ phases:
 
       # Function to send notification to Microsoft Teams
       - |
-          STACK_URL="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=&filteringStatus=active&viewNested=false"
-          MESSAGE="There are some changes occurred in stacks. Please review and approve to execute."
-          WEBHOOK_URL="https://knackforge.webhook.office.com/webhookb2/93eea688-6368-4c47-8d54-92a7ba364b30@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/a5fab871a77e4c3ab1f770a1ba50c18f/73c1d036-08b9-4dd3-8346-afa964097b0a"
-          PAYLOAD="{\"text\": \"${MESSAGE} Status: ${STATUS}. CloudFormation Stack URL: ${STACK_URL}\"}"
+              STACK_URL="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=&filteringStatus=active&viewNested=false"
+              MESSAGE="Some new changes have been occurred in stacks. Please review and approve to execute."
+              WEBHOOK_URL="https://knackforge.webhook.office.com/webhookb2/93eea688-6368-4c47-8d54-92a7ba364b30@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/a5fab871a77e4c3ab1f770a1ba50c18f/73c1d036-08b9-4dd3-8346-afa964097b0a"
+              PAYLOAD="{\"text\": \"${MESSAGE} Status: ${STATUS}. CloudFormation Stack URL: ${STACK_URL}\\"}"
 
-          echo "WEBHOOK_URL: ${WEBHOOK_URL}"
-          echo "PAYLOAD: ${PAYLOAD}"
+              echo "WEBHOOK_URL: ${WEBHOOK_URL}"
+              echo "PAYLOAD: ${PAYLOAD}"
 
-          curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
-      
+              curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
+          }
+
       # Check and deploy/update helper-stack if changes are detected
       - echo checking changes for helper-stack
       - |
@@ -31,7 +32,7 @@ phases:
           STATUS=$(aws cloudformation describe-change-set --stack-name helper-stack-${StackENV} --change-set-name ${CHANGE_SET_ID} --query 'Status' --output text)
 
           if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-            notify_teams "helper-stack" "${STATUS}"
+            notify_teams "Helper stack" "${STATUS}"
           fi
         fi
 
@@ -44,7 +45,7 @@ phases:
           STATUS=$(aws cloudformation describe-change-set --stack-name network-stack-${StackENV} --change-set-name ${CHANGE_SET_ID} --query 'Status' --output text)
 
           if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-            notify_teams "network-stack" "${STATUS}"
+            notify_teams "Network stack" "${STATUS}"
           fi
         fi
 
@@ -57,10 +58,9 @@ phases:
           STATUS=$(aws cloudformation describe-change-set --stack-name infra-stack-${StackENV} --change-set-name ${CHANGE_SET_ID} --query 'Status' --output text)
 
           if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-            notify_teams "infra-stack" "${STATUS}"
+            notify_teams "Infra stack" "${STATUS}"
           fi
         fi
-
 
 artifacts:
   files:
