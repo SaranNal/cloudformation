@@ -20,8 +20,9 @@ phases:
             aws cloudformation create-change-set --stack-name helper-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml --change-set-name helper-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket}
 
             STATUS=$(aws cloudformation describe-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset --query 'Status' --output text)
+            echo $STATUS
             if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-              MESSAGE="Some new changes have been occurred in ${STACK_NAME}. Please review and approve to execute."
+            MESSAGE="Some new changes have been occurred in ${STACK_NAME}. Please review and approve to execute."
               PAYLOAD="{\"text\": \"${MESSAGE} Status: ${STATUS}. CloudFormation Stack URL: ${STACK_URL}\"}"
               echo "Sending notification to Microsoft Teams: ${MESSAGE}"
               curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
