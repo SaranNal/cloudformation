@@ -10,6 +10,7 @@ phases:
           aws cloudformation wait stack-update-complete --stack-name helper-stack-${StackENV}
         else
           echo "No changes detected for helper-stack or change set creation failed."
+          aws cloudformation delete-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
         fi
 
       - echo "Checking and executing change set for network-stack"
@@ -20,6 +21,7 @@ phases:
           aws cloudformation wait stack-update-complete --stack-name network-stack-${StackENV}
         else
           echo "No changes detected for network-stack or change set creation failed."
+          aws cloudformation delete-change-set --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset
         fi
 
       - echo "Checking and executing change set for infra-stack"
@@ -30,6 +32,7 @@ phases:
           aws cloudformation wait stack-update-complete --stack-name infra-stack-${StackENV}
         else
           echo "No changes detected for infra-stack or change set creation failed."
+          aws cloudformation delete-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset
         fi
 
 artifacts:
