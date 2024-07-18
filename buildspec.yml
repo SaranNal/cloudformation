@@ -18,10 +18,10 @@ phases:
           echo "Updating helper-stack..."
           aws cloudformation create-change-set --stack-name helper-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml --change-set-name helper-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket}
           aws cloudformation wait change-set-create-complete --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
-          aws cloudformation describe-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
+          STATUS=$(aws cloudformation describe-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset --query 'Status' --output text)
           echo $STATUS
-          STACK_NAME="helper-stack"
-          sh notify-teams.sh $STACK_NAME $STATUS
+          # STACK_NAME="helper-stack"
+          # sh notify-teams.sh $STACK_NAME $STATUS
           if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
             notify_teams "Helper stack" "${STATUS}"
           fi
