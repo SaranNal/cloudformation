@@ -20,7 +20,7 @@ phases:
           aws cloudformation wait change-set-create-complete --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
           aws cloudformation describe-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
           STACK_NAME="helper-stack"
-          ./notify-teams.sh $STACK_NAME $STATUS
+          sh notify-teams.sh $STACK_NAME $STATUS
           echo $STATUS
           if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
             notify_teams "Helper stack" "${STATUS}"
