@@ -60,9 +60,9 @@ COMMON_PARAMETERS="ParameterKey=Environment,ParameterValue=${Environment} Parame
 
 # Define stacks and their specific parameters
 declare -A stacks
-stacks[helper]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml ${COMMON_PARAMETERS} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket}"
-stacks[network]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}"
-stacks[infra]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ${COMMON_PARAMETERS} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}"
+stacks[helper-stack]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml ${COMMON_PARAMETERS} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket}"
+stacks[network-stack]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}"
+stacks[infra-stack]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ${COMMON_PARAMETERS} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}"
 
 # Loop through each stack and create/update the change set
 for stack_name in "${!stacks[@]}"; do
