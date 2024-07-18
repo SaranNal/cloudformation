@@ -43,6 +43,10 @@ Resources:
             FromPort: 9443
             ToPort: 9443
             CidrIp: 0.0.0.0/0
+          - IpProtocol: ssh
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 0.0.0.0/0
         Tags:
           - Key: Name
             Value: !Sub ${Environment}-alb-sg
