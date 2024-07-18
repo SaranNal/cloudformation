@@ -64,8 +64,8 @@ Resources:
               - arn:aws:s3:::exported--maps/*
               - arn:aws:s3:::reblie--assets
               - arn:aws:s3:::reblie--assets/*
-              - arn:aws:s3:::saran-asset
-              - arn:aws:s3:::saran-asset/*
+              - arn:aws:s3:::saran--asset
+              - arn:aws:s3:::saran--asset/*
         - PolicyName: EXEC_SSM_Permissions
           PolicyDocument:
             Version: '2012-10-17'
