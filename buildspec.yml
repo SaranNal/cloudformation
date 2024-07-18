@@ -17,17 +17,7 @@ phases:
           echo "Updating helper-stack..."
           aws cloudformation create-change-set --stack-name helper-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml --change-set-name helper-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket}
           aws cloudformation wait change-set-create-complete --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
-          STATUS=$(aws cloudformation describe-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset --query 'Status' --output text)
-          echo $STATUS
-          STACK_NAME="helper-stack"
-          if [ -f notify-teams.sh ]; then
-            sh notify-teams.sh $STACK_NAME $STATUS
-            if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-              notify_teams "Helper stack" "${STATUS}"
-            fi
-          else
-            echo "notify-teams.sh script not found"
-          fi
+          aws cloudformation describe-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset
         fi
 
       # Check and deploy/update network-stack if changes are detected
@@ -37,17 +27,7 @@ phases:
           echo "Updating network-stack..."
           aws cloudformation create-change-set --stack-name network-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml --change-set-name network-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}
           aws cloudformation wait change-set-create-complete --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset
-          STATUS=$(aws cloudformation describe-change-set --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset --query 'Status' --output text)
-          echo $STATUS
-          STACK_NAME="network-stack"
-          if [ -f notify-teams.sh ]; then
-            sh notify-teams.sh $STACK_NAME $STATUS
-            if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-              notify_teams "Network stack" "${STATUS}"
-            fi
-          else
-            echo "notify-teams.sh script not found"
-          fi
+          aws cloudformation describe-change-set --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset
         fi
 
       # Check and deploy/update infra-stack if changes are detected
@@ -57,17 +37,7 @@ phases:
           echo "Updating infra-stack..."
           aws cloudformation create-change-set --stack-name infra-stack-${StackENV} --template-url https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml --change-set-name infra-stack-changeset --capabilities CAPABILITY_NAMED_IAM --include-nested-stacks --parameters ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}
           aws cloudformation wait change-set-create-complete --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset
-          STATUS=$(aws cloudformation describe-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset --query 'Status' --output text)
-          echo $STATUS
-          STACK_NAME="infra-stack"
-          if [ -f notify-teams.sh ]; then
-            sh notify-teams.sh $STACK_NAME $STATUS
-            if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-              notify_teams "Infra stack" "${STATUS}"
-            fi
-          else
-            echo "notify-teams.sh script not found"
-          fi
+          aws cloudformation describe-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset
         fi
 
 artifacts:
