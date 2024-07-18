@@ -11,7 +11,7 @@ create_change_set() {
   parameters=$4
 
   full_stack_name="${stack_name}-stack-${stack_env}"
-  change_set_name="${stack_name}-changeset"
+  change_set_name="${stack_name}-stack-changeset"
 
   if aws cloudformation describe-stacks --stack-name "${full_stack_name}" >/dev/null 2>&1; then
     echo "Updating ${full_stack_name}..."
@@ -60,8 +60,8 @@ notify_teams() {
 # Define stacks and their specific parameters
 declare -A stacks
 stacks[helper]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml ./parameters/common_parameters.sh ./parameters/helper_stack_parameters.sh"
-stacks[network]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml ./network_stack_parameters.sh"
-stacks[infra]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ./parameters/common_parameters.sh ./infra_stack_parameters.sh"
+stacks[network]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml ./parameters/network_stack_parameters.sh"
+stacks[infra]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ./parameters/common_parameters.sh ./parameters/infra_stack_parameters.sh"
 
 # Loop through each stack and create/update the change set
 for stack_name in "${!stacks[@]}"; do
