@@ -10,7 +10,15 @@ phases:
       - echo running s3 sync command
       - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec.yml" --exclude "CurrentHelperRootstack.yaml" --exclude "CurrentNetworkRootstack.yaml" --exclude "CurrentInfraRootstack.yaml" --exclude ".gitignore"
 
-     
+      - echo "Checking environment variables"
+      - echo "StackENV: ${StackENV}"
+      - echo "Environment: ${Environment}"
+      - echo "ProjectName: ${ProjectName}"
+      - echo "CodeStarConnectionID: ${CodeStarConnectionID}"
+      - echo "CLONE_TEMPLATE_BUCKET: ${CLONE_TEMPLATE_BUCKET}"
+      - echo "S3LogBucket: ${S3LogBucket}"
+      - echo "SSLCertificateID: ${SSLCertificateID}"
+
       # Check and deploy/update helper-stack if changes are detected
       - echo checking changes for helper-stack
       - |
@@ -21,11 +29,14 @@ phases:
           STATUS=$(aws cloudformation describe-change-set --stack-name helper-stack-${StackENV} --change-set-name helper-stack-changeset --query 'Status' --output text)
           echo $STATUS
           STACK_NAME="helper-stack"
-          sh notify-teams.sh $STACK_NAME $STATUS
-          if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-            notify_teams "Helper stack" "${STATUS}"
+          if [ -f notify-teams.sh ]; then
+            sh notify-teams.sh $STACK_NAME $STATUS
+            if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
+              notify_teams "Helper stack" "${STATUS}"
+            fi
+          else
+            echo "notify-teams.sh script not found"
           fi
-
         fi
 
       # Check and deploy/update network-stack if changes are detected
@@ -38,11 +49,14 @@ phases:
           STATUS=$(aws cloudformation describe-change-set --stack-name network-stack-${StackENV} --change-set-name network-stack-changeset --query 'Status' --output text)
           echo $STATUS
           STACK_NAME="network-stack"
-          sh notify-teams.sh $STACK_NAME $STATUS
-          if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-            notify_teams "Network stack" "${STATUS}"
+          if [ -f notify-teams.sh ]; then
+            sh notify-teams.sh $STACK_NAME $STATUS
+            if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
+              notify_teams "Network stack" "${STATUS}"
+            fi
+          else
+            echo "notify-teams.sh script not found"
           fi
-
         fi
 
       # Check and deploy/update infra-stack if changes are detected
@@ -55,13 +69,16 @@ phases:
           STATUS=$(aws cloudformation describe-change-set --stack-name infra-stack-${StackENV} --change-set-name infra-stack-changeset --query 'Status' --output text)
           echo $STATUS
           STACK_NAME="infra-stack"
-          sh notify-teams.sh $STACK_NAME $STATUS
-          if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-            notify_teams "Infra stack" "${STATUS}"
+          if [ -f notify-teams.sh ]; then
+            sh notify-teams.sh $STACK_NAME $STATUS
+            if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
+              notify_teams "Infra stack" "${STATUS}"
+            fi
+          else
+            echo "notify-teams.sh script not found"
           fi
-          
         fi
 
 artifacts:
   files:
-    - "**/*" 
+    - "**/*"
