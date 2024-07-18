@@ -60,10 +60,10 @@ Resources:
               Effect: Allow
               Action: s3:*
               Resource:
-              - arn:aws:s3:::reblie--assets
-              - arn:aws:s3:::reblie--assets/*
-              - arn:aws:s3:::saran--asset
-              - arn:aws:s3:::saran--asset/*
+              - arn:aws:s3:::exported-maps
+              - arn:aws:s3:::exported-maps/*
+              - arn:aws:s3:::reblie-assets
+              - arn:aws:s3:::reblie-assets/*
         - PolicyName: EXEC_SSM_Permissions
           PolicyDocument:
             Version: '2012-10-17'
@@ -114,10 +114,8 @@ Resources:
               Resource:
               - arn:aws:s3:::exported-maps
               - arn:aws:s3:::exported-maps/*
-              - arn:aws:s3:::reblie.assets
-              - arn:aws:s3:::reblie.assets/*
-              - arn:aws:s3:::saran.assets
-              - arn:aws:s3:::saran.assets/*
+              - arn:aws:s3:::reblie-assets
+              - arn:aws:s3:::reblie-assets/*
         - PolicyName: EXEC_SSM_Permissions
           PolicyDocument:
             Version: '2012-10-17'
