@@ -2,6 +2,9 @@
 
 # Source the common parameters file
 source ./parameters/common_parameters.sh
+source ./parameters/helper_stack_parameters.sh
+source ./parameters/network_stack_parameters.sh
+source ./parameters/infra_stack_parameters.sh
 
 # Function to create or update a change set for a given stack
 create_change_set() {
