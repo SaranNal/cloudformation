@@ -2,13 +2,13 @@
 
 # Function to create or update a change set for a given stack
 create_change_set() {
-  local stack_name=$1
-  local stack_env=$2
-  local template_url=$3
-  local parameters=$4
+  stack_name=$1
+  stack_env=$2
+  template_url=$3
+  parameters=$4
 
-  local full_stack_name="${stack_name}-stack-${stack_env}"
-  local change_set_name="${stack_name}-changeset"
+  full_stack_name="${stack_name}-stack-${stack_env}"
+  change_set_name="${stack_name}-changeset"
 
   if aws cloudformation describe-stacks --stack-name "${full_stack_name}" >/dev/null 2>&1; then
     echo "Updating ${full_stack_name}..."
