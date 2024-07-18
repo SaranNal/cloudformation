@@ -60,8 +60,6 @@ Resources:
               Effect: Allow
               Action: s3:*
               Resource:
-              - arn:aws:s3:::exported--maps
-              - arn:aws:s3:::exported--maps/*
               - arn:aws:s3:::reblie--assets
               - arn:aws:s3:::reblie--assets/*
               - arn:aws:s3:::saran--asset
