@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Source the common parameters file
+source ./parameters/common_parameters.sh
+
 # Function to create or update a change set for a given stack
 create_change_set() {
   stack_name=$1
@@ -54,20 +57,29 @@ notify_teams() {
   curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
 }
 
-# Define stack parameters
-STACK_ENV=${StackENV}
-COMMON_PARAMETERS="ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=CodeStarConnectionID,ParameterValue=${CodeStarConnectionID} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}"
-
 # Define stacks and their specific parameters
 declare -A stacks
-stacks[helper]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml ${COMMON_PARAMETERS} ParameterKey=S3LogBucket,ParameterValue=${S3LogBucket}"
-stacks[network]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml ParameterKey=Environment,ParameterValue=${Environment} ParameterKey=ProjectName,ParameterValue=${ProjectName} ParameterKey=StackBucketName,ParameterValue=${CLONE_TEMPLATE_BUCKET}"
-stacks[infra]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ${COMMON_PARAMETERS} ParameterKey=SSLCertificateID,ParameterValue=${SSLCertificateID}"
+stacks[helper]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml ./parameters/common_parameters.sh ./parameters/helper_stack_parameters.sh"
+stacks[network]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml ./network_stack_parameters.sh"
+stacks[infra]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ./parameters/common_parameters.sh ./infra_stack_parameters.sh"
 
 # Loop through each stack and create/update the change set
 for stack_name in "${!stacks[@]}"; do
   IFS=' ' read -r -a stack_params <<< "${stacks[$stack_name]}"
   template_url=${stack_params[0]}
-  parameters=${stacks[$stack_name]#"$template_url "}
+  parameter_file=${stack_params[1]}
+
+  # Source the specific parameter file
+  source ./${parameter_file}
+
+  # Combine common parameters with stack-specific parameters
+  if [ "${stack_name}" == "helper" ]; then
+    parameters="${COMMON_PARAMETERS} ${HELPER_STACK_PARAMETERS}"
+  elif [ "${stack_name}" == "network" ]; then
+    parameters="${NETWORK_STACK_PARAMETERS}"
+  elif [ "${stack_name}" == "infra" ]; then
+    parameters="${COMMON_PARAMETERS} ${INFRA_STACK_PARAMETERS}"
+  fi
+
   create_change_set "${stack_name}" "${STACK_ENV}" "${template_url}" "${parameters}"
 done
