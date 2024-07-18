@@ -10,15 +10,6 @@ phases:
       - echo running s3 sync command
       - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec.yml" --exclude "CurrentHelperRootstack.yaml" --exclude "CurrentNetworkRootstack.yaml" --exclude "CurrentInfraRootstack.yaml" --exclude ".gitignore"
 
-      - echo "Checking environment variables"
-      - echo "StackENV: ${StackENV}"
-      - echo "Environment: ${Environment}"
-      - echo "ProjectName: ${ProjectName}"
-      - echo "CodeStarConnectionID: ${CodeStarConnectionID}"
-      - echo "CLONE_TEMPLATE_BUCKET: ${CLONE_TEMPLATE_BUCKET}"
-      - echo "S3LogBucket: ${S3LogBucket}"
-      - echo "SSLCertificateID: ${SSLCertificateID}"
-
       # Check and deploy/update helper-stack if changes are detected
       - echo checking changes for helper-stack
       - |
