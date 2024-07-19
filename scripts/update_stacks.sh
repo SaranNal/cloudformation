@@ -6,6 +6,9 @@ source ./parameters/helper_stack_parameters.sh
 source ./parameters/network_stack_parameters.sh
 source ./parameters/infra_stack_parameters.sh
 
+# Initialize a variable to accumulate messages
+NOTIFICATION_MESSAGES=""
+
 # Function to create or update a change set for a given stack
 create_change_set() {
   stack_name=$1
@@ -32,7 +35,7 @@ create_change_set() {
     echo "Change set status: ${change_set_status}"
     
     if [ "${change_set_status}" == "CREATE_COMPLETE" ]; then
-      notify_teams "${full_stack_name}" "${change_set_status}"
+      accumulate_message "${full_stack_name}" "${change_set_status}"
     fi
     
   else
@@ -40,8 +43,8 @@ create_change_set() {
   fi
 }
 
-# Function to send notifications to Microsoft Teams
-notify_teams() {
+# Function to accumulate messages to be sent to Microsoft Teams
+accumulate_message() {
   STACK_NAME=$1
   STATUS=$2
   STACK_URL="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=&filteringStatus=active&viewNested=false"
@@ -54,8 +57,13 @@ notify_teams() {
     MESSAGE="Unknown status ${STATUS} for stack **${STACK_NAME}**."
   fi
 
+  NOTIFICATION_MESSAGES+="${MESSAGE}<br>Status: **${STATUS}**.<br>CloudFormation Stack URL: ${STACK_URL}<br><br>"
+}
+
+# Function to send the accumulated notification to Microsoft Teams
+send_notification() {
   WEBHOOK_URL="https://knackforge.webhook.office.com/webhookb2/93eea688-6368-4c47-8d54-92a7ba364b30@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/a5fab871a77e4c3ab1f770a1ba50c18f/73c1d036-08b9-4dd3-8346-afa964097b0a"
-  PAYLOAD="{\"text\": \"${MESSAGE}<br>Status: **${STATUS}**.<br>CloudFormation Stack URL: ${STACK_URL}\"}"
+  PAYLOAD="{\"text\": \"${NOTIFICATION_MESSAGES}\"}"
   
   curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
 }
@@ -86,3 +94,6 @@ for stack_name in "${!stacks[@]}"; do
 
   create_change_set "${stack_name}" "${STACK_ENV}" "${template_url}" "${parameters}"
 done
+
+# Send the accumulated notification to Microsoft Teams
+send_notification
