@@ -14,10 +14,29 @@ load_parameters_from_json() {
   
   # Format JSON parameters for AWS CLI
   # jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
-  jq -r '.COMMON_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
-  jq -r '.helper_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
-  jq -r '.infra_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
-  jq -r '.network_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
+  # jq -r '.COMMON_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
+  # jq -r '.helper_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
+  # jq -r '.infra_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
+  # jq -r '.network_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
+# Determine which type of parameter file it is and format accordingly
+  case "${json_file}" in
+    *common_parameters.json)
+      jq -r '.COMMON_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      ;;
+    *helper_stack_parameters.json)
+      jq -r '.HELPER_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      ;;
+    *infra_stack_parameters.json)
+      jq -r '.INFRA_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      ;;
+    *network_stack_parameters.json)
+      jq -r '.NETWORK_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      ;;
+    *)
+      echo "Error: JSON file ${json_file} has an unknown format."
+      exit 1
+      ;;
+  esac
 }
 
 # Initialize a variable to accumulate messages
