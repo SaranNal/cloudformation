@@ -1,8 +1,18 @@
 #!/bin/bash
 
+# Print the current directory for debugging
+echo "Current directory: $(pwd)"
+
 # Function to load parameters from a JSON file
 load_parameters_from_json() {
   local json_file=$1
+  
+  if [ ! -f "${json_file}" ]; then
+    echo "Error: JSON file ${json_file} does not exist."
+    exit 1
+  fi
+  
+  # Check JSON structure
   jq -r '. | to_entries | map("ParameterKey=\(.key),ParameterValue=\(.value)") | join(" ")' "${json_file}"
 }
 
@@ -70,9 +80,9 @@ send_notification() {
 
 # Define stacks and their specific parameter files
 declare -A stacks
-stacks[helper]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml parameters/common_parameters.json parameters/helper_stack_parameters.json"
-stacks[network]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml parameters/network_stack_parameters.json"
-stacks[infra]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml parameters/common_parameters.json parameters/infra_stack_parameters.json"
+stacks[helper]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/helper_stack_parameters.json"
+stacks[network]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml ./parameters/network_stack_parameters.json"
+stacks[infra]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/infra_stack_parameters.json"
 
 # Loop through each stack and create/update the change set
 for stack_name in "${!stacks[@]}"; do
@@ -83,6 +93,7 @@ for stack_name in "${!stacks[@]}"; do
   # Combine parameters from all specified JSON files
   parameters=""
   for param_file in "${parameter_files[@]}"; do
+    echo "Loading parameters from ${param_file}..."
     parameters+=$(load_parameters_from_json "${param_file}")" "
   done
 
