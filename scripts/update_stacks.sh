@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Source the common parameters file
-source ./parameters/common_parameters.sh
-source ./parameters/helper_stack_parameters.sh
-source ./parameters/network_stack_parameters.sh
-source ./parameters/infra_stack_parameters.sh
+# Function to load parameters from a JSON file
+load_parameters_from_json() {
+  local json_file=$1
+  jq -r '. | to_entries | map("ParameterKey=\(.key),ParameterValue=\(.value)") | join(" ")' "${json_file}"
+}
 
 # Initialize a variable to accumulate messages
 NOTIFICATION_MESSAGES=""
@@ -68,29 +68,23 @@ send_notification() {
   curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
 }
 
-# Define stacks and their specific parameters
+# Define stacks and their specific parameter files
 declare -A stacks
-stacks[helper]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml ./parameters/common_parameters.sh ./parameters/helper_stack_parameters.sh"
-stacks[network]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml ./parameters/network_stack_parameters.sh"
-stacks[infra]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ./parameters/common_parameters.sh ./parameters/infra_stack_parameters.sh"
+stacks[helper]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml parameters/common_parameters.json parameters/helper_parameters.json"
+stacks[network]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml parameters/network_parameters.json"
+stacks[infra]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml parameters/common_parameters.json parameters/infra_parameters.json"
 
 # Loop through each stack and create/update the change set
 for stack_name in "${!stacks[@]}"; do
   IFS=' ' read -r -a stack_params <<< "${stacks[$stack_name]}"
   template_url=${stack_params[0]}
-  parameter_file=${stack_params[1]}
+  parameter_files=("${stack_params[@]:1}")
 
-  # Source the specific parameter file
-  source ./${parameter_file}
-
-  # Combine common parameters with stack-specific parameters
-  if [ "${stack_name}" == "helper" ]; then
-    parameters="${COMMON_PARAMETERS} ${HELPER_STACK_PARAMETERS}"
-  elif [ "${stack_name}" == "network" ]; then
-    parameters="${NETWORK_STACK_PARAMETERS}"
-  elif [ "${stack_name}" == "infra" ]; then
-    parameters="${COMMON_PARAMETERS} ${INFRA_STACK_PARAMETERS}"
-  fi
+  # Combine parameters from all specified JSON files
+  parameters=""
+  for param_file in "${parameter_files[@]}"; do
+    parameters+=$(load_parameters_from_json "${param_file}")" "
+  done
 
   create_change_set "${stack_name}" "${STACK_ENV}" "${template_url}" "${parameters}"
 done
