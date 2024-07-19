@@ -13,7 +13,11 @@ load_parameters_from_json() {
   fi
   
   # Format JSON parameters for AWS CLI
-  jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
+  # jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
+  jq -r '.COMMON_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
+  jq -r '.helper_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
+  jq -r '.infra_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
+  jq -r '.network_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
 }
 
 # Initialize a variable to accumulate messages
