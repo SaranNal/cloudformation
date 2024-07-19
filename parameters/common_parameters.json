@@ -1,13 +1,13 @@
 {
-  "STACK_ENV": "dev",
-  "Environment": "dev",
-  "ProjectName": "saran",
-  "CodeStarConnectionID": "93b8e92b-c501-4fb7-a30d-487c138b6d46",
-  "CLONE_TEMPLATE_BUCKET": "test-cloudformation-template-clone-stack",
+  "STACK_ENV": "$STACK_ENV",
+  "Environment": "$Environment",
+  "ProjectName": "$ProjectName",
+  "CodeStarConnectionID": "$CodeStarConnectionID",
+  "CLONE_TEMPLATE_BUCKET": "$CLONE_TEMPLATE_BUCKET",
   "COMMON_PARAMETERS": [
-    {"ParameterKey": "Environment", "ParameterValue": "dev"},
-    {"ParameterKey": "ProjectName", "ParameterValue": "saran"},
-    {"ParameterKey": "CodeStarConnectionID", "ParameterValue": "93b8e92b-c501-4fb7-a30d-487c138b6d46"},
-    {"ParameterKey": "StackBucketName", "ParameterValue": "test-cloudformation-template-clone-stack"}
+    {"ParameterKey": "Environment", "ParameterValue": "$Environment"},
+    {"ParameterKey": "ProjectName", "ParameterValue": "$ProjectName"},
+    {"ParameterKey": "CodeStarConnectionID", "ParameterValue": "$CodeStarConnectionID"},
+    {"ParameterKey": "StackBucketName", "ParameterValue": "$StackBucketName"}
   ]
 }
