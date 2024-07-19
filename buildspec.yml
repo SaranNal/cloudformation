@@ -1,8 +1,8 @@
 version: 0.2
 
-env:
-  variables:
-    STACK_ENV: "dev"
+# env:
+#   variables:
+#     STACK_ENV: "dev"
 
 phases:
   pre_build:
