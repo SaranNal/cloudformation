@@ -13,7 +13,7 @@ load_parameters_from_json() {
   fi
   
   # Check JSON structure
-  jq -r '. | to_entries | map("ParameterKey=\(.key),ParameterValue=\(.value)") | join(" ")' "${json_file}"
+  jq -r '. | to_entries | map("Parameter Key=\(.key),Parameter Value=\(.value)") | join(" ")' "${json_file}"
 }
 
 # Initialize a variable to accumulate messages
