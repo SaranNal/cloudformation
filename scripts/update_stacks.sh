@@ -12,8 +12,8 @@ load_parameters_from_json() {
     exit 1
   fi
   
-  # Check JSON structure
-  jq -r '. | to_entries | map("ParameterKey=\(.key),ParameterValue=\(.value)") | join(" ")' "${json_file}"
+  # Format JSON parameters for AWS CLI
+  jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
 }
 
 # Initialize a variable to accumulate messages
@@ -87,11 +87,8 @@ stacks[infra]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com
 # Loop through each stack and create/update the change set
 for stack_name in "${!stacks[@]}"; do
   IFS=' ' read -r -a stack_params <<< "${stacks[$stack_name]}"
-  echo $IFS
   template_url=${stack_params[0]}
-  echo $template_url
   parameter_files=("${stack_params[@]:1}")
-  echo $parameter_files
 
   # Combine parameters from all specified JSON files
   parameters=""
