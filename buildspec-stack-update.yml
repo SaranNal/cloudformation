@@ -10,5 +10,5 @@ phases:
   build:
     commands:
       - echo Building the project...
-      - chmod +x execute_change_sets.sh
-      - ./execute_change_sets.sh ${StackENV}
+      - chmod +x ./scripts/execute_change_sets.sh
+      - ./scripts/execute_change_sets.sh ${StackENV}
