@@ -6,6 +6,9 @@ echo "Current directory: $(pwd)"
 # Print the STACK_ENV to verify it is being set correctly
 echo "STACK_ENV is set to: ${STACK_ENV}"
 
+# Print the Environment to verify it is being set correctly
+echo "Environment is set to: ${Environment}"
+
 # Function to load parameters from a JSON file
 load_parameters_from_json() {
   local json_file=$1
