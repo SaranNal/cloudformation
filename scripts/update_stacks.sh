@@ -8,7 +8,7 @@ echo "STACK_ENV is set to: ${STACK_ENV}"
 
 # Print the Environment to verify it is being set correctly
 echo "Environment is set to: ${Environment}"
-echo "StackBucketName is set to: ${StackBucketName}"
+echo "StackBucketName is set to: ${CLONE_TEMPLATE_BUCKET}"
 
 # Function to load parameters from a JSON file
 load_parameters_from_json() {
