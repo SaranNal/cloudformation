@@ -8,7 +8,12 @@ echo "STACK_ENV is set to: ${STACK_ENV}"
 
 # Print the Environment to verify it is being set correctly
 echo "Environment is set to: ${Environment}"
-echo "StackBucketName is set to: ${CLONE_TEMPLATE_BUCKET}"
+
+# Function to replace environment variables in a JSON file
+replace_env_variables() {
+  local json_file=$1
+  envsubst < "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
+}
 
 # Function to load parameters from a JSON file
 load_parameters_from_json() {
@@ -19,13 +24,10 @@ load_parameters_from_json() {
     exit 1
   fi
   
-  # Format JSON parameters for AWS CLI
-  # jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
-  # jq -r '.COMMON_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
-  # jq -r '.helper_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
-  # jq -r '.infra_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
-  # jq -r '.network_stack_parameters[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}" | tr '\n' ' '
-# Determine which type of parameter file it is and format accordingly
+  # Replace environment variables in the JSON file
+  replace_env_variables "${json_file}"
+
+  # Determine which type of parameter file it is and format accordingly
   case "${json_file}" in
     *common_parameters.json)
       jq -r '.COMMON_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
