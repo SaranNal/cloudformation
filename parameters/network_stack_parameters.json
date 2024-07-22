@@ -1,11 +1,11 @@
 {
-  "STACK_ENV": "dev",
-  "Environment": "dev",
-  "ProjectName": "saran",
-  "CLONE_TEMPLATE_BUCKET": "test-cloudformation-template-clone-stack",
+  "STACK_ENV": "$STACK_ENV",
+  "Environment": "$Environment",
+  "ProjectName": "$ProjectName",
+  "CLONE_TEMPLATE_BUCKET": "$CLONE_TEMPLATE_BUCKET",
   "NETWORK_STACK_PARAMETERS": [
-    {"ParameterKey": "Environment", "ParameterValue": "dev"},
-    {"ParameterKey": "ProjectName", "ParameterValue": "saran"},
-    {"ParameterKey": "StackBucketName", "ParameterValue": "test-cloudformation-template-clone-stack"}
+    {"ParameterKey": "Environment", "ParameterValue": "$Environment"},
+    {"ParameterKey": "ProjectName", "ParameterValue": "$ProjectName"},
+    {"ParameterKey": "StackBucketName", "ParameterValue": "$CLONE_TEMPLATE_BUCKET"}
   ]
 }
