@@ -3,11 +3,11 @@
   "Environment": "dev",
   "ProjectName": "$ProjectName",
   "CodeStarConnectionID": "$CodeStarConnectionID",
-  "CLONE_TEMPLATE_BUCKET": "$CLONE_TEMPLATE_BUCKET",
+  "StackBucketName": "$StackBucketName",
   "COMMON_PARAMETERS": [
     {"ParameterKey": "Environment", "ParameterValue": "dev"},
     {"ParameterKey": "ProjectName", "ParameterValue": "$ProjectName"},
     {"ParameterKey": "CodeStarConnectionID", "ParameterValue": "$CodeStarConnectionID"},
-    {"ParameterKey": "StackBucketName", "ParameterValue": "$CLONE_TEMPLATE_BUCKET"}
+    {"ParameterKey": "StackBucketName", "ParameterValue": "$StackBucketName"}
   ]
 }
