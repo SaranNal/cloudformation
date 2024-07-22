@@ -13,7 +13,7 @@ phases:
   build:
     commands:
       - echo running s3 sync command
-      - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec.yml" --exclude ".gitignore"
+      - aws s3 sync ./ s3://${StackBucketName}/ --exclude "buildspec.yml" --exclude ".gitignore"
       - echo running stack updates
       - chmod +x ./scripts/update_stacks.sh
       - ./scripts/update_stacks.sh
