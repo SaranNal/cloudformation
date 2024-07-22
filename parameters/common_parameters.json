@@ -8,6 +8,6 @@
     {"ParameterKey": "Environment", "ParameterValue": "dev"},
     {"ParameterKey": "ProjectName", "ParameterValue": "$ProjectName"},
     {"ParameterKey": "CodeStarConnectionID", "ParameterValue": "$CodeStarConnectionID"},
-    {"ParameterKey": "StackBucketName", "ParameterValue": "$StackBucketName"}
+    {"ParameterKey": "StackBucketName", "ParameterValue": "$CLONE_TEMPLATE_BUCKET"}
   ]
 }
