@@ -14,8 +14,8 @@ Parameters:
     Type: String
   VPCId:
     Type: String
-    # Description: Required if the environment is a staging
-    # Default: "DummyValue"
+    Description: Required if the environment is a staging
+    Default: "DummyValue"
 
 Conditions:
   Staging: !Equals [!Ref Environment, stage]
