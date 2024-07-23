@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: This is a network stack which deploys VPC and SecurityGroup.
+Description: This is a network stack which deploys VPC and SecurityGroup..
 Parameters:
   Environment:
     Type: String
