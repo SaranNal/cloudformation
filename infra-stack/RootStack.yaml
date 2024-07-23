@@ -18,28 +18,28 @@ Parameters:
     Type: String
   VPCId:
     Type: String
-    Description: Required if the environment is a staging
-    Default: "DummyValue"
+    # Description: Required if the environment is a staging
+    # Default: "DummyValue"
   PublicSubnets:
     Type: CommaDelimitedList
-    Description: Required if the environment is staging
-    Default: "DummyValue"
+    # Description: Required if the environment is staging
+    # Default: "DummyValue"
   PrivateSubnets:
     Type: CommaDelimitedList
-    Description: Required if the environment is staging
-    Default: "DummyValue"
+    # Description: Required if the environment is staging
+    # Default: "DummyValue"
   HTTPSListener1:
     Type: String
-    Description: Required if the environment is staging
-    Default: "DummyValue"
+    # Description: Required if the environment is staging
+    # Default: "DummyValue"
   HTTPSListener2:
     Type: String
-    Description: Required if the environment is staging
-    Default: "DummyValue"
+    # Description: Required if the environment is staging
+    # Default: "DummyValue"
   SecurityGroup:
     Type: String
-    Description: Required if the environment is staging
-    Default: "DummyValue"
+    # Description: Required if the environment is staging
+    # Default: "DummyValue"
     
 Conditions:
   Staging: !Equals [!Ref Environment, stage]
