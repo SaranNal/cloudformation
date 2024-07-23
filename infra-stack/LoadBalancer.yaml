@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  Environment:
+    Type: String
+  ProjectName:
+    Type: String
+  VPC:
+    Description: VPC
+    Type: String
+  LoadbalancerSecurityGroup:
+    Description: LoadbalancerSecurityGroup
+    Type: String
+  SSLCertificateID:
+    Type: String
+  PublicSubnets:
+    Description: PublicSubnets
+    Type: CommaDelimitedList
+  TargetGroup1:
+    Type: String
+  TargetGroup2:
+    Type: String
+
+Resources:
+  Loadbalancer:
+    #condition only if it is dev or production
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${ProjectName}-${Environment}-alb
+      Subnets: !Ref PublicSubnets
+      SecurityGroups:
+        - !Ref LoadbalancerSecurityGroup
+      Type: application
+
+  HTTPListener:
+    #condition only if it is dev or production
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref Loadbalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: redirect
+          RedirectConfig:
+            Host: '#{host}'
+            Path: '/#{path}'
+            Query: '#{query}'
+            Port: 443
+            Protocol: HTTPS
+            StatusCode: HTTP_301
+
+  HTTPSListener1:
+    #condition only if it is dev or production
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates:
+        - CertificateArn: !Sub "arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${SSLCertificateID}"
+      LoadBalancerArn: !Ref Loadbalancer
+      Port: 443
+      Protocol: HTTPS
+      DefaultActions:
+        - Type: forward
+          TargetGroupARN: !Ref TargetGroup2
+
+  HTTPSListener2:
+    #condition only if it is dev or production
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates:
+        - CertificateArn: !Sub "arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${SSLCertificateID}"
+      LoadBalancerArn: !Ref Loadbalancer
+      Port: 9443
+      Protocol: HTTPS
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup2
+
+Outputs:
+  Loadbalancer:
+    Value: !GetAtt Loadbalancer.DNSName
+  ProdListener:
+    Value: !Ref HTTPSListener1
+  TestListener:
+    Value: !Ref HTTPSListener2
