@@ -9,8 +9,8 @@
   "INFRA_STACK_PARAMETERS": [
     {"ParameterKey": "SSLCertificateID", "ParameterValue": "$SSLCertificateID"},
     {"ParameterKey": "VPCId", "ParameterValue": "$VPCId"},
-    {"ParameterKey": "PublicSubnets", "ParameterValue": "$PublicSubnets"},
-    {"ParameterKey": "PrivateSubnets", "ParameterValue": "$PrivateSubnets"},
+    {"ParameterKey": "PublicSubnets", "ParameterValue": "${PublicSubnets// /,}"},
+    {"ParameterKey": "PrivateSubnets", "ParameterValue": "${PrivateSubnets// /,}"},
     {"ParameterKey": "HTTPSListener1", "ParameterValue": "$HTTPSListener1"},
     {"ParameterKey": "HTTPSListener2", "ParameterValue": "$HTTPSListener2"},
     {"ParameterKey": "SecurityGroup", "ParameterValue": "$SecurityGroup"}
