@@ -54,13 +54,13 @@ NOTIFICATION_MESSAGES=""
 
 # Function to create or update a change set for a given stack
 create_change_set() {
-  local stack_name=$1
-  local stack_env=$2
-  local template_url=$3
-  local parameters=$4
+  stack_name=$1
+  stack_env=$2
+  template_url=$3
+  parameters=$4
 
-  local full_stack_name="${stack_name}-stack-${stack_env}"
-  local change_set_name="${stack_name}-stack-changeset"
+  full_stack_name="${stack_name}-stack-${stack_env}"
+  change_set_name="${stack_name}-stack-changeset"
 
   if aws cloudformation describe-stacks --stack-name "${full_stack_name}" >/dev/null 2>&1; then
     echo "Updating ${full_stack_name}..."
@@ -88,11 +88,10 @@ create_change_set() {
 
 # Function to accumulate messages to be sent to Microsoft Teams
 accumulate_message() {
-  local stack_name=$1
-  local status=$2
-  local stack_url="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=&filteringStatus=active&viewNested=false"
+  stack_name=$1
+  status=$2
+  stack_url="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=&filteringStatus=active&viewNested=false"
   
-  local message
   case "${status}" in
     CREATE_COMPLETE)
       message="Some new changes have occurred in **${stack_name}**. Please review and approve to execute."
@@ -110,8 +109,8 @@ accumulate_message() {
 
 # Function to send the accumulated notification to Microsoft Teams
 send_notification() {
-  local webhook_url="https://knackforge.webhook.office.com//webhookb2/4200c843-c469-46b9-a7e0-3c059c22e68c@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/d073338c8ee14403873ff0900646574f/73c1d036-08b9-4dd3-8346-afa964097b0a"
-  local payload="{\"text\": \"${NOTIFICATION_MESSAGES}\"}"
+  webhook_url="https://knackforge.webhook.office.com//webhookb2/4200c843-c469-46b9-a7e0-3c059c22e68c@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/d073338c8ee14403873ff0900646574f/73c1d036-08b9-4dd3-8346-afa964097b0a"
+  payload="{\"text\": \"${NOTIFICATION_MESSAGES}\"}"
   
   curl -H "Content-Type: application/json" -d "${payload}" "${webhook_url}"
 }
@@ -125,11 +124,11 @@ stacks[infra]="https://reblie-cloudformation-template-stack-dev.s3.amazonaws.com
 # Loop through each stack and create/update the change set
 for stack_name in "${!stacks[@]}"; do
   IFS=' ' read -r -a stack_params <<< "${stacks[$stack_name]}"
-  local template_url=${stack_params[0]}
-  local parameter_files=("${stack_params[@]:1}")
+  template_url=${stack_params[0]}
+  parameter_files=("${stack_params[@]:1}")
 
   # Combine parameters from all specified JSON files
-  local parameters=""
+  parameters=""
   for param_file in "${parameter_files[@]}"; do
     echo "Loading parameters from ${param_file}..."
     while IFS= read -r line; do
