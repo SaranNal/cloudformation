@@ -54,13 +54,13 @@ NOTIFICATION_MESSAGES=""
 
 # Function to create or update a change set for a given stack
 create_change_set() {
-  stack_name=$1
-  stack_env=$2
-  template_url=$3
-  parameters=$4
+  local stack_name=$1
+  local stack_env=$2
+  local template_url=$3
+  local parameters=$4
 
-  full_stack_name="${stack_name}-stack-${stack_env}"
-  change_set_name="${stack_name}-stack-changeset"
+  local full_stack_name="${stack_name}-stack-${stack_env}"
+  local change_set_name="${stack_name}-stack-changeset"
 
   if aws cloudformation describe-stacks --stack-name "${full_stack_name}" >/dev/null 2>&1; then
     echo "Updating ${full_stack_name}..."
@@ -88,27 +88,32 @@ create_change_set() {
 
 # Function to accumulate messages to be sent to Microsoft Teams
 accumulate_message() {
-  STACK_NAME=$1
-  STATUS=$2
-  STACK_URL="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=&filteringStatus=active&viewNested=false"
+  local stack_name=$1
+  local status=$2
+  local stack_url="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=&filteringStatus=active&viewNested=false"
   
-  if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
-    MESSAGE="Some new changes have occurred in **${STACK_NAME}**. Please review and approve to execute."
-  elif [ "${STATUS}" == "FAILED" ]; then
-    MESSAGE="No changes detected in **${STACK_NAME}**."
-  else
-    MESSAGE="Unknown status ${STATUS} for stack **${STACK_NAME}**."
-  fi
+  local message
+  case "${status}" in
+    CREATE_COMPLETE)
+      message="Some new changes have occurred in **${stack_name}**. Please review and approve to execute."
+      ;;
+    FAILED)
+      message="No changes detected in **${stack_name}**."
+      ;;
+    *)
+      message="Unknown status ${status} for stack **${stack_name}**."
+      ;;
+  esac
 
-  NOTIFICATION_MESSAGES+="${MESSAGE}<br>Status: **${STATUS}**.<br>CloudFormation Stack URL: ${STACK_URL}<br><br>"
+  NOTIFICATION_MESSAGES+="${message}<br>Status: **${status}**.<br>CloudFormation Stack URL: ${stack_url}<br><br>"
 }
 
 # Function to send the accumulated notification to Microsoft Teams
 send_notification() {
-  WEBHOOK_URL="https://knackforge.webhook.office.com//webhookb2/4200c843-c469-46b9-a7e0-3c059c22e68c@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/d073338c8ee14403873ff0900646574f/73c1d036-08b9-4dd3-8346-afa964097b0a"
-  PAYLOAD="{\"text\": \"${NOTIFICATION_MESSAGES}\"}"
+  local webhook_url="https://knackforge.webhook.office.com//webhookb2/4200c843-c469-46b9-a7e0-3c059c22e68c@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/d073338c8ee14403873ff0900646574f/73c1d036-08b9-4dd3-8346-afa964097b0a"
+  local payload="{\"text\": \"${NOTIFICATION_MESSAGES}\"}"
   
-  curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
+  curl -H "Content-Type: application/json" -d "${payload}" "${webhook_url}"
 }
 
 # Define stacks and their specific parameter files
@@ -120,15 +125,21 @@ stacks[infra]="https://reblie-cloudformation-template-stack-dev.s3.amazonaws.com
 # Loop through each stack and create/update the change set
 for stack_name in "${!stacks[@]}"; do
   IFS=' ' read -r -a stack_params <<< "${stacks[$stack_name]}"
-  template_url=${stack_params[0]}
-  parameter_files=("${stack_params[@]:1}")
+  local template_url=${stack_params[0]}
+  local parameter_files=("${stack_params[@]:1}")
 
   # Combine parameters from all specified JSON files
-  parameters=""
+  local parameters=""
   for param_file in "${parameter_files[@]}"; do
     echo "Loading parameters from ${param_file}..."
-    parameters+=$(load_parameters_from_json "${param_file}")" "
+    while IFS= read -r line; do
+      # Replace newline with space and add to parameters
+      parameters+="${line} "
+    done < <(load_parameters_from_json "${param_file}")
   done
+
+  # Trim trailing space from parameters
+  parameters=$(echo "${parameters}" | sed 's/ *$//')
 
   create_change_set "${stack_name}" "${STACK_ENV}" "${template_url}" "${parameters}"
 done
