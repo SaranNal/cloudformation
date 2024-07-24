@@ -9,8 +9,8 @@
   "INFRA_STACK_PARAMETERS": [
     {"ParameterKey": "SSLCertificateID", "ParameterValue": "c038183c-5752-4c8f-b992-4f5c166c8b14"},
     {"ParameterKey": "VPCId", "ParameterValue": "vpc-0d6dbbb56ffdd43f9"},
-    {"ParameterKey": "PublicSubnets", "ParameterValue": ["subnet-0bc9e2992de3412ae","subnet-0a2ee0382e3fffdea","subnet-07d88f457c3d22490","subnet-02f6f269c97e21a69","subnet-0b09996022939ca89","subnet-09913ab8e8aa50d3f"]},
-    {"ParameterKey": "PrivateSubnets", "ParameterValue": ["subnet-0bf8512f3dc77c79b","subnet-010780120c4aa74c6","subnet-0a211aafd0e1af03b","subnet-067999a6e63c7abe8","subnet-0b7f741ecc9c96c4e","subnet-0e92d3f901abbe4d2"]},
+    {"ParameterKey": "PublicSubnets", "ParameterValue": "subnet-0bc9e2992de3412ae,subnet-0a2ee0382e3fffdea,subnet-07d88f457c3d22490,subnet-02f6f269c97e21a69,subnet-0b09996022939ca89,subnet-09913ab8e8aa50d3f"},
+    {"ParameterKey": "PrivateSubnets", "ParameterValue": "subnet-0bf8512f3dc77c79b,subnet-010780120c4aa74c6,subnet-0a211aafd0e1af03b,subnet-067999a6e63c7abe8,subnet-0b7f741ecc9c96c4e,subnet-0e92d3f901abbe4d2"},
     {"ParameterKey": "HTTPSListener1", "ParameterValue": "arn:aws:elasticloadbalancing:us-east-1:484537496937:listener/app/saran-dev-alb/c91cf37143bcddb9/6846a10a435505fa"},
     {"ParameterKey": "HTTPSListener2", "ParameterValue": "arn:aws:elasticloadbalancing:us-east-1:484537496937:listener/app/saran-dev-alb/c91cf37143bcddb9/786465df81c6d263"},
     {"ParameterKey": "SecurityGroup", "ParameterValue": "sg-03a5216036e64eaa4"}
