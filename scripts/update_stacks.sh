@@ -3,21 +3,17 @@
 # Print the current directory for debugging
 echo "Current directory: $(pwd)"
 
-# Print environment variables for debugging
+# Print the STACK_ENV to verify it is being set correctly
 echo "STACK_ENV is set to: ${STACK_ENV}"
+
+# Print the Environment to verify it is being set correctly
 echo "Environment is set to: ${Environment}"
-echo "StackBucketName is set to: ${CLONE_TEMPLATE_BUCKET}"
+echo "StackBucketName is set to: ${CF_TEMPLATE_BUCKET}"
 
 # Function to replace environment variables in a JSON file
 replace_env_variables() {
   local json_file=$1
   envsubst < "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
-}
-
-# Function to format lists into comma-separated strings
-format_list_to_string() {
-  local list="$1"
-  echo "${list}" | jq -r 'join(",")'
 }
 
 # Function to load parameters from a JSON file
@@ -29,20 +25,22 @@ load_parameters_from_json() {
     exit 1
   fi
   
+  # Replace environment variables in the JSON file
   replace_env_variables "${json_file}"
 
+  # Determine which type of parameter file it is and format accordingly
   case "${json_file}" in
     *common_parameters.json)
-      jq -r '.COMMON_PARAMETERS[] | select(.ParameterValue != null) | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.COMMON_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *helper_stack_parameters.json)
-      jq -r '.HELPER_STACK_PARAMETERS[] | select(.ParameterValue != null) | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.HELPER_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *infra_stack_parameters.json)
-      jq -r '.INFRA_STACK_PARAMETERS[] | select(.ParameterValue != null) | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.INFRA_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *network_stack_parameters.json)
-      jq -r '.NETWORK_STACK_PARAMETERS[] | select(.ParameterValue != null) | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.NETWORK_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *)
       echo "Error: JSON file ${json_file} has an unknown format."
@@ -107,7 +105,7 @@ accumulate_message() {
 
 # Function to send the accumulated notification to Microsoft Teams
 send_notification() {
-  WEBHOOK_URL="https://knackforge.webhook.office.com/webhookb2/93eea688-6368-4c47-8d54-92a7ba364b30@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/a5fab871a77e4c3ab1f770a1ba50c18f/73c1d036-08b9-4dd3-8346-afa964097b0a"
+  WEBHOOK_URL="https://knackforge.webhook.office.com//webhookb2/4200c843-c469-46b9-a7e0-3c059c22e68c@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/d073338c8ee14403873ff0900646574f/73c1d036-08b9-4dd3-8346-afa964097b0a"
   PAYLOAD="{\"text\": \"${NOTIFICATION_MESSAGES}\"}"
   
   curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
@@ -115,9 +113,9 @@ send_notification() {
 
 # Define stacks and their specific parameter files
 declare -A stacks
-stacks[helper]="https://test-cloudformation-template-current-stack.s3.amazonaws.com/helper-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/helper_stack_parameters.json"
-stacks[network]="https://test-cloudformation-template-current-stack.s3.amazonaws.com/network-stack/RootStack.yaml ./parameters/network_stack_parameters.json"
-stacks[infra]="https://test-cloudformation-template-current-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/infra_stack_parameters.json"
+stacks[helper]="https://reblie-cloudformation-template-stack-dev.s3.amazonaws.com/helper-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/helper_stack_parameters.json"
+stacks[network]="https://reblie-cloudformation-template-stack-dev.s3.amazonaws.com/network-stack/RootStack.yaml ./parameters/network_stack_parameters.json"
+stacks[infra]="https://reblie-cloudformation-template-stack-dev.s3.amazonaws.com/infra-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/infra_stack_parameters.json"
 
 # Loop through each stack and create/update the change set
 for stack_name in "${!stacks[@]}"; do
@@ -129,24 +127,9 @@ for stack_name in "${!stacks[@]}"; do
   parameters=""
   for param_file in "${parameter_files[@]}"; do
     echo "Loading parameters from ${param_file}..."
-    params=$(load_parameters_from_json "${param_file}")
-
-    # Append each parameter in the required format
-    for param in ${params}; do
-      if [[ "${param}" =~ "ParameterValue=" ]]; then
-        parameter_value=$(echo "${param}" | cut -d'=' -f2)
-        if [ -z "${parameter_value}" ]; then
-          param=$(echo "${param}" | sed 's/ParameterValue=.*/UsePreviousValue=true/')
-        fi
-      fi
-      parameters+="${param} "
-    done
+    parameters+=$(load_parameters_from_json "${param_file}")" "
   done
 
-  # Remove trailing space
-  parameters=$(echo "$parameters" | sed 's/ *$//')
-
-  # Create or update the change set
   create_change_set "${stack_name}" "${STACK_ENV}" "${template_url}" "${parameters}"
 done
 
