@@ -18,6 +18,12 @@ replace_env_variables() {
   envsubst < "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
 }
 
+# Function to format lists into comma-separated strings
+format_list_to_string() {
+  local list="$1"
+  echo "${list}" | jq -r 'join(",")'
+}
+
 # Function to load parameters from a JSON file
 load_parameters_from_json() {
   local json_file=$1
@@ -33,16 +39,16 @@ load_parameters_from_json() {
   # Determine which type of parameter file it is and format accordingly
   case "${json_file}" in
     *common_parameters.json)
-      jq -r '.COMMON_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.COMMON_PARAMETERS[] | select(.ParameterValue != null) | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *helper_stack_parameters.json)
-      jq -r '.HELPER_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.HELPER_STACK_PARAMETERS[] | select(.ParameterValue != null) | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *infra_stack_parameters.json)
-      jq -r '.INFRA_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.INFRA_STACK_PARAMETERS[] | select(.ParameterValue != null) | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *network_stack_parameters.json)
-      jq -r '.NETWORK_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.NETWORK_STACK_PARAMETERS[] | select(.ParameterValue != null) | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *)
       echo "Error: JSON file ${json_file} has an unknown format."
@@ -130,10 +136,19 @@ for stack_name in "${!stacks[@]}"; do
   for param_file in "${parameter_files[@]}"; do
     echo "Loading parameters from ${param_file}..."
     params=$(load_parameters_from_json "${param_file}")
-    
-    # Format each parameter as "ParameterKey=key,ParameterValue=value"
-    formatted_params=$(echo "${params}" | awk -F ',' '{gsub(/ParameterValue=/, "ParameterValue="); gsub(/,/,"\\,"); print}')
-    parameters+="${formatted_params} "
+
+    # Append each parameter in the required format
+    for param in ${params}; do
+      # Check if ParameterValue is empty
+      if [[ "${param}" =~ "ParameterValue=" ]]; then
+        parameter_value=$(echo "${param}" | cut -d'=' -f2)
+        if [ -z "${parameter_value}" ]; then
+          # If ParameterValue is empty, use the previous value
+          param=$(echo "${param}" | sed 's/ParameterValue=.*/UsePreviousValue=true/')
+        fi
+      fi
+      parameters+="${param} "
+    done
   done
 
   # Remove trailing space
