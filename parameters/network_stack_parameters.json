@@ -3,9 +3,11 @@
   "Environment": "$Environment",
   "ProjectName": "$ProjectName",
   "CLONE_TEMPLATE_BUCKET": "$CLONE_TEMPLATE_BUCKET",
+  "VPCId": "$VPCId",
   "NETWORK_STACK_PARAMETERS": [
     {"ParameterKey": "Environment", "ParameterValue": "$Environment"},
     {"ParameterKey": "ProjectName", "ParameterValue": "$ProjectName"},
     {"ParameterKey": "StackBucketName", "ParameterValue": "$CLONE_TEMPLATE_BUCKET"}
+    {"ParameterKey": "VPCId", "ParameterValue": "$VPCId"}
   ]
 }
