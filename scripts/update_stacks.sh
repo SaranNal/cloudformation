@@ -3,18 +3,14 @@
 # Print the current directory for debugging
 echo "Current directory: $(pwd)"
 
-# Print the STACK_ENV to verify it is being set correctly
+# Print environment variables for debugging
 echo "STACK_ENV is set to: ${STACK_ENV}"
-
-# Print the Environment to verify it is being set correctly
 echo "Environment is set to: ${Environment}"
 echo "StackBucketName is set to: ${CLONE_TEMPLATE_BUCKET}"
 
 # Function to replace environment variables in a JSON file
 replace_env_variables() {
   local json_file=$1
-
-  # Replace environment variables in the JSON file
   envsubst < "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
 }
 
@@ -33,10 +29,8 @@ load_parameters_from_json() {
     exit 1
   fi
   
-  # Replace environment variables in the JSON file
   replace_env_variables "${json_file}"
 
-  # Determine which type of parameter file it is and format accordingly
   case "${json_file}" in
     *common_parameters.json)
       jq -r '.COMMON_PARAMETERS[] | select(.ParameterValue != null) | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
@@ -139,11 +133,9 @@ for stack_name in "${!stacks[@]}"; do
 
     # Append each parameter in the required format
     for param in ${params}; do
-      # Check if ParameterValue is empty
       if [[ "${param}" =~ "ParameterValue=" ]]; then
         parameter_value=$(echo "${param}" | cut -d'=' -f2)
         if [ -z "${parameter_value}" ]; then
-          # If ParameterValue is empty, use the previous value
           param=$(echo "${param}" | sed 's/ParameterValue=.*/UsePreviousValue=true/')
         fi
       fi
