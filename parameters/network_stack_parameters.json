@@ -7,7 +7,7 @@
   "NETWORK_STACK_PARAMETERS": [
     {"ParameterKey": "Environment", "ParameterValue": "$Environment"},
     {"ParameterKey": "ProjectName", "ParameterValue": "$ProjectName"},
-    {"ParameterKey": "StackBucketName", "ParameterValue": "$CLONE_TEMPLATE_BUCKET"}
+    {"ParameterKey": "StackBucketName", "ParameterValue": "$CLONE_TEMPLATE_BUCKET"},
     {"ParameterKey": "VPCId", "ParameterValue": "$VPCId"}
   ]
 }
