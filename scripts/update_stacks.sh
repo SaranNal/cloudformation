@@ -13,13 +13,6 @@ echo "StackBucketName is set to: ${CLONE_TEMPLATE_BUCKET}"
 # Function to replace environment variables in a JSON file
 replace_env_variables() {
   local json_file=$1
-  # Ensure PublicSubnets and PrivateSubnets are treated as comma-separated strings
-  local public_subnets_str=$(IFS=,; echo "${PublicSubnets[*]}")
-  local private_subnets_str=$(IFS=,; echo "${PrivateSubnets[*]}")
-  
-  # Export the variables to make them available for envsubst
-  export PublicSubnets="$public_subnets_str"
-  export PrivateSubnets="$private_subnets_str"
 
   # Replace environment variables in the JSON file
   envsubst < "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
