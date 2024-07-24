@@ -9,6 +9,8 @@ echo "STACK_ENV is set to: ${STACK_ENV}"
 # Print the Environment to verify it is being set correctly
 echo "Environment is set to: ${Environment}"
 echo "StackBucketName is set to: ${CLONE_TEMPLATE_BUCKET}"
+echo "PublicSubnets is set to: ${PublicSubnets}"
+echo "PrivateSubnets is set to: ${PrivateSubnets}"
 
 # Function to replace environment variables in a JSON file
 replace_env_variables() {
