@@ -18,14 +18,14 @@ Parameters:
     Type: String
   VPCId:
     Type: String
-    # Description: Required if the environment is a staging
+    # Description: Required if the environment is a staging CommaDelimitedList
     # Default: "DummyValue"
   PublicSubnets:
-    Type: CommaDelimitedList
+    Type: String
     # Description: Required if the environment is staging
     # Default: "DummyValue"
   PrivateSubnets:
-    Type: CommaDelimitedList
+    Type: String
     # Description: Required if the environment is staging
     # Default: "DummyValue"
   HTTPSListener1:
