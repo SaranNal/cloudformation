@@ -132,8 +132,8 @@ for stack_name in "${!stacks[@]}"; do
     parameters+=$(load_parameters_from_json "${param_file}")" "
   done
 
-  # # Remove trailing space
-  # parameters=$(echo "$parameters" | sed 's/ *$//')
+  # Remove trailing space
+  parameters=$(echo "$parameters" | sed 's/ *$//')
 
   create_change_set "${stack_name}" "${STACK_ENV}" "${template_url}" "${parameters}"
 done
