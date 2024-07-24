@@ -129,12 +129,17 @@ for stack_name in "${!stacks[@]}"; do
   parameters=""
   for param_file in "${parameter_files[@]}"; do
     echo "Loading parameters from ${param_file}..."
-    parameters+=$(load_parameters_from_json "${param_file}")" "
+    params=$(load_parameters_from_json "${param_file}")
+    
+    # Format each parameter as "ParameterKey=key,ParameterValue=value"
+    formatted_params=$(echo "${params}" | awk -F ',' '{gsub(/ParameterValue=/, "ParameterValue="); gsub(/,/,"\\,"); print}')
+    parameters+="${formatted_params} "
   done
 
   # Remove trailing space
   parameters=$(echo "$parameters" | sed 's/ *$//')
 
+  # Create or update the change set
   create_change_set "${stack_name}" "${STACK_ENV}" "${template_url}" "${parameters}"
 done
 
