@@ -51,27 +51,6 @@ load_parameters_from_json() {
   esac
 }
 
-# # Function to load and format parameters from a shell script
-# load_parameters_from_sh() {
-#   local sh_file=$1
-  
-#   if [ ! -f "${sh_file}" ]; then
-#     echo "Error: Shell script file ${sh_file} does not exist."
-#     exit 1
-#   fi
-  
-#   # Source the shell script to get the parameters
-#   source "${sh_file}"
-
-#   # Format the parameters into the required "ParameterKey=ParameterValue" format
-#   local formatted_parameters=""
-#   for param in "${INFRA_STACK_PARAMETERS[@]}"; do
-#     formatted_parameters+=" ${param}"
-#   done
-
-#   echo "${formatted_parameters}"
-# }
-
 # Initialize a variable to accumulate messages
 NOTIFICATION_MESSAGES=""
 
