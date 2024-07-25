@@ -7,7 +7,8 @@ function load_parameters() {
   
   for json_file in "${json_files[@]}"; do
     if [[ -f "$json_file" ]]; then
-      parameters+=" $(jq -c '.[] | "\(.ParameterKey)=\(.ParameterValue)"' "$json_file" | tr '\n' ' ')"
+      # Correctly format parameters to avoid extra quotes
+      parameters+=" $(jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"' "$json_file")"
     else
       echo "Warning: File $json_file not found."
     fi
@@ -40,6 +41,8 @@ for stack in "${!stacks[@]}"; do
     parameters_files=("${parameter_files[@]:1}")
     parameters=$(load_parameters "${parameters_files[@]}")
     
+    echo "Parameters to be used: $parameters"  # Debugging output
+
     # Create change set
     aws cloudformation create-change-set \
       --stack-name ${stack}-${StackENV} \
