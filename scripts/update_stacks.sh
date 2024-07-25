@@ -56,7 +56,7 @@ load_parameters_from_json() {
 #       exit 1
 #       ;;
 #   esac
-# }
+}
 
 # Initialize a variable to accumulate messages
 NOTIFICATION_MESSAGES=""
