@@ -79,7 +79,7 @@ create_change_set() {
       --change-set-name "${change_set_name}" \
       --capabilities CAPABILITY_NAMED_IAM \
       --include-nested-stacks \
-      --parameters file://parameters/
+      --parameters ${parameters}
 
     aws cloudformation wait change-set-create-complete --stack-name "${full_stack_name}" --change-set-name "${change_set_name}"
     
