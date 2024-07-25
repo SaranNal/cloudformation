@@ -63,6 +63,10 @@ load_parameters_from_sh() {
   # Source the shell script to get the parameters
   source "${sh_file}"
 
+  # Format the subnet parameters into comma-delimited strings
+  PublicSubnets=$(IFS=,; echo "${PublicSubnets[*]}")
+  PrivateSubnets=$(IFS=,; echo "${PrivateSubnets[*]}")
+
   # Format the parameters into the required "ParameterKey=ParameterValue" format
   local formatted_parameters=""
   for param in ${INFRA_STACK_PARAMETERS}; do
