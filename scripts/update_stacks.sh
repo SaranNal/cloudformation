@@ -97,7 +97,7 @@ accumulate_message() {
 
 # Function to send the accumulated notification to Microsoft Teams
 send_notification() {
-  local webhook_url="https://knackforge.webhook.office.com//webhookb2/4200c843-c469-46b9-a7e0-3c059c22e68c@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/d073338c8ee14403873ff0900646574f/73c1d036-08b9-4dd3-8346-afa964097b0a"
+  local webhook_url="https://knackforge.webhook.office.com///webhookb2/93eea688-6368-4c47-8d54-92a7ba364b30@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/b33092ade4844d969f3031df68fd25b4/73c1d036-08b9-4dd3-8346-afa964097b0a"
   local payload="{\"text\": \"${NOTIFICATION_MESSAGES}\"}"
   
   curl -H "Content-Type: application/json" -d "${payload}" "${webhook_url}"
