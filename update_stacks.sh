@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Print the STACK_ENV to verify it is being set correctly
+echo "STACK_ENV is set to: ${STACK_ENV}"
+
+# Print the Environment to verify it is being set correctly
+echo "Environment is set to: ${Environment}"
+
 # Function to create or update a change set for a given stack
 create_change_set() {
   stack_name=$1
