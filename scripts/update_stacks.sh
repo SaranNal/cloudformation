@@ -45,7 +45,7 @@ load_parameters_from_json() {
       jq -r '.HELPER_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *infra_stack_parameters.json)
-      jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' infra_stack_parameters.json
       ;;
     *network_stack_parameters.json)
       jq -r '.NETWORK_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
@@ -131,15 +131,11 @@ for stack_name in "${!stacks[@]}"; do
   template_url=${stack_params[0]}
   parameter_files=("${stack_params[@]:1}")
 
-  # Combine parameters from all specified JSON files and shell scripts
+  # Combine parameters from all specified JSON files
   parameters=""
   for param_file in "${parameter_files[@]}"; do
     echo "Loading parameters from ${param_file}..."
-    if [[ "${param_file}" == *.sh ]]; then
-      parameters+=$(load_parameters_from_sh "${param_file}")" "
-    else
-      parameters+=$(load_parameters_from_json "${param_file}")" "
-    fi
+    parameters+=$(load_parameters_from_json "${param_file}")" "
   done
 
   create_change_set "${stack_name}" "${STACK_ENV}" "${template_url}" "${parameters}"
