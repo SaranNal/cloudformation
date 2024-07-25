@@ -51,7 +51,7 @@ load_parameters_from_json() {
   esac
 }
 
-# Function to load parameters from a shell script
+# Function to load and format parameters from a shell script
 load_parameters_from_sh() {
   local sh_file=$1
   
@@ -60,7 +60,16 @@ load_parameters_from_sh() {
     exit 1
   fi
   
+  # Source the shell script to get the parameters
   source "${sh_file}"
+
+  # Format the parameters into the required "ParameterKey=ParameterValue" format
+  local formatted_parameters=""
+  for param in ${INFRA_STACK_PARAMETERS}; do
+    formatted_parameters+=" ${param}"
+  done
+
+  echo "${formatted_parameters}"
 }
 
 # Initialize a variable to accumulate messages
@@ -137,11 +146,15 @@ for stack_name in "${!stacks[@]}"; do
   template_url=${stack_params[0]}
   parameter_files=("${stack_params[@]:1}")
 
-  # Combine parameters from all specified JSON files
+  # Combine parameters from all specified JSON files and shell scripts
   parameters=""
   for param_file in "${parameter_files[@]}"; do
     echo "Loading parameters from ${param_file}..."
-    parameters+=$(load_parameters_from_json "${param_file}")" "
+    if [[ "${param_file}" == *.sh ]]; then
+      parameters+=$(load_parameters_from_sh "${param_file}")" "
+    else
+      parameters+=$(load_parameters_from_json "${param_file}")" "
+    fi
   done
 
   create_change_set "${stack_name}" "${STACK_ENV}" "${template_url}" "${parameters}"
