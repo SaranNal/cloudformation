@@ -25,14 +25,14 @@ replace_env_variables() {
   envsubst < "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
 }
 
-# # Function to load parameters from a JSON file
-# load_parameters_from_json() {
-#   local json_file=$1
+# Function to load parameters from a JSON file
+load_parameters_from_json() {
+  local json_file=$1
   
-#   if [ ! -f "${json_file}" ]; then
-#     echo "Error: JSON file ${json_file} does not exist."
-#     exit 1
-#   fi
+  if [ ! -f "${json_file}" ]; then
+    echo "Error: JSON file ${json_file} does not exist."
+    exit 1
+  fi
   
 #   # Replace environment variables in the JSON file
 #   replace_env_variables "${json_file}"
@@ -79,7 +79,7 @@ create_change_set() {
       --change-set-name "${change_set_name}" \
       --capabilities CAPABILITY_NAMED_IAM \
       --include-nested-stacks \
-      --parameters ${parameters}
+      --parameters file://parameters/
 
     aws cloudformation wait change-set-create-complete --stack-name "${full_stack_name}" --change-set-name "${change_set_name}"
     
