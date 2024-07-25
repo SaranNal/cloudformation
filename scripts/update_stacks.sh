@@ -15,6 +15,7 @@ echo "PrivateSubnets is set to: ${PrivateSubnets}"
 # Convert PublicSubnets and PrivateSubnets to strings
 PUBLIC_SUBNETS=$(echo ${PublicSubnets} | jq -R -s -c 'split(" ") | join(",")' | tr -d '\n')
 echo "PublicSubnets as string: $PUBLIC_SUBNETS"
+
 PRIVATE_SUBNETS=$(echo ${PrivateSubnets} | jq -R -s -c 'split(" ") | join(",")' | tr -d '\n')
 echo "PrivateSubnets as string: $PRIVATE_SUBNETS"
 
@@ -39,16 +40,16 @@ load_parameters_from_json() {
   # Determine which type of parameter file it is and format accordingly
   case "${json_file}" in
     *common_parameters.json)
-      jq -r '.COMMON_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *helper_stack_parameters.json)
-      jq -r '.HELPER_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *infra_stack_parameters.json)
-      jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' infra_stack_parameters.json
+      jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *network_stack_parameters.json)
-      jq -r '.NETWORK_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
       ;;
     *)
       echo "Error: JSON file ${json_file} has an unknown format."
