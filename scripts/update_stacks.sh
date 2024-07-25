@@ -1,19 +1,29 @@
 #!/bin/bash
 
-# Load parameters from JSON files
+# Load parameters from multiple JSON files
 function load_parameters() {
-  local json_file="$1"
-  echo $(jq -c '.[] | "\(.ParameterKey)=\(.ParameterValue)"' "$json_file" | tr '\n' ' ')
+  local json_files=("$@")
+  local parameters=""
+  
+  for json_file in "${json_files[@]}"; do
+    if [[ -f "$json_file" ]]; then
+      parameters+=" $(jq -c '.[] | "\(.ParameterKey)=\(.ParameterValue)"' "$json_file" | tr '\n' ' ')"
+    else
+      echo "Warning: File $json_file not found."
+    fi
+  done
+  
+  echo "$parameters"
 }
 
 # Define the environment variable
 StackENV="$STACK_ENV"
 
-# Define stack names and templates
+# Define stack names, templates, and parameter files
 declare -A stacks
 stacks=( 
   ["helper-stack"]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/helper_stack_parameters.json"
-  ["network-stack"]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml ./parameters/network_stack_parameters.json"
+  ["network-stack"]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/network_stack_parameters.json"
   ["infra-stack"]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/infra_stack_parameters.json"
 )
 
@@ -25,13 +35,15 @@ for stack in "${!stacks[@]}"; do
     echo "Updating ${stack}..."
     
     # Load parameters specific to the stack
-    parameters_file="${stack}-parameters.json"
-    parameters=$(load_parameters "$parameters_file")
+    IFS=' ' read -r -a parameter_files <<< "${stacks[$stack]}"
+    template_url="${parameter_files[0]}"
+    parameters_files=("${parameter_files[@]:1}")
+    parameters=$(load_parameters "${parameters_files[@]}")
     
     # Create change set
     aws cloudformation create-change-set \
       --stack-name ${stack}-${StackENV} \
-      --template-url ${stacks[$stack]} \
+      --template-url $template_url \
       --change-set-name ${stack}-changeset \
       --capabilities CAPABILITY_NAMED_IAM \
       --include-nested-stacks \
