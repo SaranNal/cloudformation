@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# Load parameters from multiple JSON files
+# Load parameters from multiple JSON files and format them as JSON objects
 function load_parameters() {
   local json_files=("$@")
   local parameters=""
-  
+
   for json_file in "${json_files[@]}"; do
     if [[ -f "$json_file" ]]; then
-      # Correctly format parameters to avoid extra quotes
-      parameters+=" $(jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"' "$json_file")"
+      # Append parameters in JSON format
+      parameters+=" $(jq -c '.[] | {ParameterKey: .ParameterKey, ParameterValue: .ParameterValue}' "$json_file")"
     else
       echo "Warning: File $json_file not found."
     fi
@@ -40,8 +40,6 @@ for stack in "${!stacks[@]}"; do
     template_url="${parameter_files[0]}"
     parameters_files=("${parameter_files[@]:1}")
     parameters=$(load_parameters "${parameters_files[@]}")
-    
-    echo "Parameters to be used: $parameters"  # Debugging output
 
     # Create change set
     aws cloudformation create-change-set \
@@ -50,7 +48,7 @@ for stack in "${!stacks[@]}"; do
       --change-set-name ${stack}-changeset \
       --capabilities CAPABILITY_NAMED_IAM \
       --include-nested-stacks \
-      --parameters $parameters
+      --parameters "$parameters"
 
     # Wait for change set creation to complete
     aws cloudformation wait change-set-create-complete --stack-name ${stack}-${StackENV} --change-set-name ${stack}-changeset
