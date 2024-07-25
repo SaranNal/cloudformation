@@ -1,13 +1,20 @@
 {
-  "STACK_ENV": "$STACK_ENV",
-  "Environment": "$Environment",
-  "ProjectName": "$ProjectName",
-  "CodeStarConnectionID": "$CodeStarConnectionID",
-  "CLONE_TEMPLATE_BUCKET": "$CLONE_TEMPLATE_BUCKET",
   "COMMON_PARAMETERS": [
-    {"ParameterKey": "Environment", "ParameterValue": "$Environment"},
-    {"ParameterKey": "ProjectName", "ParameterValue": "$ProjectName"},
-    {"ParameterKey": "CodeStarConnectionID", "ParameterValue": "$CodeStarConnectionID"},
-    {"ParameterKey": "StackBucketName", "ParameterValue": "$CLONE_TEMPLATE_BUCKET"}
+    {
+      "ParameterKey": "Environment",
+      "ParameterValue": "$Environment"
+    },
+    {
+      "ParameterKey": "ProjectName",
+      "ParameterValue": "$ProjectName"
+    },
+    {
+      "ParameterKey": "CodeStarConnectionID",
+      "ParameterValue": "$CodeStarConnectionID"
+    },
+    {
+      "ParameterKey": "StackBucketName",
+      "ParameterValue": "$CLONE_TEMPLATE_BUCKET"
+    }
   ]
 }
