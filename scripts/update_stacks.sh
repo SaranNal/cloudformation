@@ -10,44 +10,44 @@ echo "STACK_ENV is set to: ${STACK_ENV}"
 echo "Environment is set to: ${Environment}"
 echo "StackBucketName is set to: ${CLONE_TEMPLATE_BUCKET}"
 
-# # Function to replace environment variables in a JSON file
-# replace_env_variables() {
-#   local json_file=$1
-#   envsubst < "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
-# }
+# Function to replace environment variables in a JSON file
+replace_env_variables() {
+  local json_file=$1
+  envsubst < "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
+}
 
-# # Function to load parameters from a JSON file
-# load_parameters_from_json() {
-#   local json_file=$1
+# Function to load parameters from a JSON file
+load_parameters_from_json() {
+  local json_file=$1
   
-#   if [ ! -f "${json_file}" ]; then
-#     echo "Error: JSON file ${json_file} does not exist."
-#     exit 1
-#   fi
+  if [ ! -f "${json_file}" ]; then
+    echo "Error: JSON file ${json_file} does not exist."
+    exit 1
+  fi
   
-#   # Replace environment variables in the JSON file
-#   replace_env_variables "${json_file}"
+  # Replace environment variables in the JSON file
+  replace_env_variables "${json_file}"
 
-#   # Determine which type of parameter file it is and format accordingly
-#   case "${json_file}" in
-#     *common_parameters.json)
-#       jq -r '.COMMON_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
-#       ;;
-#     *helper_stack_parameters.json)
-#       jq -r '.HELPER_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
-#       ;;
-#     *infra_stack_parameters.json)
-#       jq -r '.[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
-#       ;;
-#     *network_stack_parameters.json)
-#       jq -r '.NETWORK_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
-#       ;;
-#     *)
-#       echo "Error: JSON file ${json_file} has an unknown format."
-#       exit 1
-#       ;;
-#   esac
-# }
+  # Determine which type of parameter file it is and format accordingly
+  case "${json_file}" in
+    *common_parameters.json)
+      jq -r '.COMMON_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      ;;
+    *helper_stack_parameters.json)
+      jq -r '.HELPER_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      ;;
+    *infra_stack_parameters.json)
+      jq -r '.INFRA_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      ;;
+    *network_stack_parameters.json)
+      jq -r '.NETWORK_STACK_PARAMETERS[] | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"' "${json_file}"
+      ;;
+    *)
+      echo "Error: JSON file ${json_file} has an unknown format."
+      exit 1
+      ;;
+  esac
+}
 
 # Initialize a variable to accumulate messages
 NOTIFICATION_MESSAGES=""
