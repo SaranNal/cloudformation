@@ -3,7 +3,7 @@
 echo "${parameters}"
 
 # Define parameters
-StackENV=$1
+STACK_ENV=$1
 Environment=$2
 ProjectName=$3
 CodeStarConnectionID=$4
@@ -43,19 +43,19 @@ update_stack() {
 
   # Check if stack exists
   echo "Checking changes for ${stack_name}..."
-  if aws cloudformation describe-stacks --stack-name "${stack_name}-stage" >/dev/null 2>&1; then
+  if aws cloudformation describe-stacks --stack-name "${stack_name}-${STACK_ENV}" >/dev/null 2>&1; then
     echo "Updating ${stack_name}..."
-    aws cloudformation create-change-set --stack-name "${stack_name}-stage" \
+    aws cloudformation create-change-set --stack-name "${stack_name}-${STACK_ENV}" \
                                          --template-url "${template_url}" \
                                          --change-set-name "${change_set_name}" \
                                          --capabilities CAPABILITY_NAMED_IAM \
                                          --include-nested-stacks \
                                          --parameters "${parameters}"
-    aws cloudformation wait change-set-create-complete --stack-name "${stack_name}-stage" --change-set-name "${change_set_name}"
-    change_set_status=$(aws cloudformation describe-change-set --stack-name "${stack_name}-stage" --change-set-name "${change_set_name}" --query 'Status' --output text)
+    aws cloudformation wait change-set-create-complete --stack-name "${stack_name}-${STACK_ENV}" --change-set-name "${change_set_name}"
+    change_set_status=$(aws cloudformation describe-change-set --stack-name "${stack_name}-${STACK_ENV}" --change-set-name "${change_set_name}" --query 'Status' --output text)
 
     # Accumulate message
-    accumulate_message "${stack_name}-stage" "${change_set_status}"
+    accumulate_message "${stack_name}-${STACK_ENV}" "${change_set_status}"
   else
     echo "${stack_name}-stage does not exist, skipping."
   fi
@@ -87,10 +87,10 @@ send_notification() {
 }
 
 # File paths to parameters
-common_parameters_file="parameters/common_parameters.json"
-helper_stack_parameters_file="parameters/helper_stack_parameters.json"
-network_stack_parameters_file="parameters/network_stack_parameters.json"
-infra_stack_parameters_file="parameters/infra_stack_parameters.json"
+common_parameters_file="stage/parameters/common_parameters.json"
+helper_stack_parameters_file="stage/parameters/helper_stack_parameters.json"
+network_stack_parameters_file="stage/parameters/network_stack_parameters.json"
+infra_stack_parameters_file="stage/parameters/infra_stack_parameters.json"
 
 # Update stacks
 update_stack "helper-stack" "https://test-cloudformation-template-current-stack.s3.amazonaws.com/helper-stack/RootStack.yaml" "${helper_stack_parameters_file}"
