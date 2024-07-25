@@ -1,8 +1,8 @@
 version: 0.2
 
-env:
-  variables:
-    VPCId: "vpc-0d6dbbb56ffdd43f9"
+# env:
+#   variables:
+#     STACK_ENV: "$STACK_ENV"
     # PublicSubnets: "$PublicSubnets"
     # PrivateSubnets: "$PrivateSubnets"
     # HTTPSListener1: "arn:aws:elasticloadbalancing:us-east-1:484537496937:listener/app/saran-dev-alb/c91cf37143bcddb9/6846a10a435505fa"
@@ -21,7 +21,7 @@ phases:
       - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec.yml" --exclude "buildspec-stack-update.yml" --exclude "scripts/*" --exclude "parameters/*" --exclude ".gitignore"
       - echo running stack updates
       - chmod +x ./scripts/update_stacks.sh
-      - ./scripts/update_stacks.sh
+      - ./scripts/update_stacks.sh $STACK_ENV
 
 artifacts:
   files:
