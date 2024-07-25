@@ -1,6 +1,6 @@
-{
-  "S3LogBucket": "$S3LogBucket",
-  "HELPER_STACK_PARAMETERS": [
-    {"ParameterKey": "S3LogBucket", "ParameterValue": "$S3LogBucket"}
-  ]
-}
+[
+  {
+    "ParameterKey": "S3LogBucket",
+    "ParameterValue": "$S3LogBucket"
+  }
+]
