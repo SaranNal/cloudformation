@@ -12,6 +12,12 @@ echo "StackBucketName is set to: ${CLONE_TEMPLATE_BUCKET}"
 echo "PublicSubnets is set to: ${PublicSubnets}"
 echo "PrivateSubnets is set to: ${PrivateSubnets}"
 
+# Convert PublicSubnets and PrivateSubnets to strings
+PUBLIC_SUBNETS=$(echo ${PublicSubnets} | jq -R -s -c 'split(" ") | join(",")' | tr -d '\n')
+echo "PublicSubnets as string: $PUBLIC_SUBNETS"
+PRIVATE_SUBNETS=$(echo ${PrivateSubnets} | jq -R -s -c 'split(" ") | join(",")' | tr -d '\n')
+echo "PrivateSubnets as string: $PRIVATE_SUBNETS"
+
 # Function to replace environment variables in a JSON file
 replace_env_variables() {
   local json_file=$1
