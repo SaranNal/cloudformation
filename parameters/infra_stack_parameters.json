@@ -1,25 +1,5 @@
 [
   {
-    "ParameterKey": "SSLCertificateID",
-    "ParameterValue": "c038183c-5752-4c8f-b992-4f5c166c8b14"
-  },
-  {
-    "ParameterKey": "ProjectName",
-    "ParameterValue": "saran"
-  },
-  {
-    "ParameterKey": "Environment",
-    "ParameterValue": "stage"
-  },
-  {
-    "ParameterKey": "CodeStarConnectionID",
-    "ParameterValue": "93b8e92b-c501-4fb7-a30d-487c138b6d46"
-  },
-  {
-    "ParameterKey": "StackBucketName",
-    "ParameterValue": "test-cloudformation-template-current-stack"
-  },
-  {
     "ParameterKey": "VPCId",
     "ParameterValue": "vpc-0d6dbbb56ffdd43f9"
   },
