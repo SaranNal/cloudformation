@@ -1,61 +1,129 @@
 #!/bin/bash
 
-# Load parameters from multiple JSON files and format them as JSON objects
-function load_parameters() {
-  local json_files=("$@")
-  local parameters=""
+# Print the current directory for debugging
+echo "Current directory: $(pwd)"
 
-  for json_file in "${json_files[@]}"; do
-    if [[ -f "$json_file" ]]; then
-      # Append parameters in JSON format
-      parameters+=" $(jq -c '.[] | {ParameterKey: .ParameterKey, ParameterValue: .ParameterValue}' "$json_file")"
-    else
-      echo "Warning: File $json_file not found."
-    fi
-  done
-  
-  echo "$parameters"
+# Print the STACK_ENV to verify it is being set correctly
+echo "STACK_ENV is set to: ${STACK_ENV}"
+
+# Print the Environment and other variables to verify they are being set correctly
+echo "Environment is set to: ${Environment}"
+echo "StackBucketName is set to: ${CLONE_TEMPLATE_BUCKET}"
+echo "PublicSubnets is set to: ${PublicSubnets}"
+echo "PrivateSubnets is set to: ${PrivateSubnets}"
+
+# Convert PublicSubnets and PrivateSubnets to strings
+PUBLIC_SUBNETS=$(echo ${PublicSubnets} | jq -R -s -c 'split(",") | join(",")')
+echo "PublicSubnets as string: $PUBLIC_SUBNETS"
+
+PRIVATE_SUBNETS=$(echo ${PrivateSubnets} | jq -R -s -c 'split(",") | join(",")')
+echo "PrivateSubnets as string: $PRIVATE_SUBNETS"
+
+# Function to replace environment variables in a JSON file
+replace_env_variables() {
+  local json_file=$1
+  envsubst < "$json_file" > "${json_file}.tmp" && mv "${json_file}.tmp" "$json_file"
 }
 
-# Define the environment variable
-StackENV="$STACK_ENV"
+# Function to load parameters from a JSON file and format them for AWS CLI
+load_parameters_from_json() {
+  local json_file=$1
 
-# Define stack names, templates, and parameter files
-declare -A stacks
-stacks=( 
-  ["helper-stack"]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/helper_stack_parameters.json"
-  ["network-stack"]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/network_stack_parameters.json"
-  ["infra-stack"]="https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/infra_stack_parameters.json"
-)
-
-# Iterate over stacks and update them
-for stack in "${!stacks[@]}"; do
-  echo "Checking changes for ${stack}..."
+  if [ ! -f "${json_file}" ]; then
+    echo "Error: JSON file ${json_file} does not exist."
+    exit 1
+  fi
   
-  if aws cloudformation describe-stacks --stack-name ${stack}-${StackENV} >/dev/null 2>&1; then
-    echo "Updating ${stack}..."
-    
-    # Load parameters specific to the stack
-    IFS=' ' read -r -a parameter_files <<< "${stacks[$stack]}"
-    template_url="${parameter_files[0]}"
-    parameters_files=("${parameter_files[@]:1}")
-    parameters=$(load_parameters "${parameters_files[@]}")
+  # Replace environment variables in the JSON file
+  replace_env_variables "${json_file}"
 
-    # Create change set
-    aws cloudformation create-change-set \
-      --stack-name ${stack}-${StackENV} \
-      --template-url $template_url \
-      --change-set-name ${stack}-changeset \
+  # Format parameters for AWS CLI
+  jq -c '.[] | {ParameterKey: .ParameterKey, ParameterValue: .ParameterValue}' "${json_file}" | jq -r '. | "ParameterKey=\(.ParameterKey),ParameterValue=\(.ParameterValue)"'
+}
+
+# Initialize a variable to accumulate messages
+NOTIFICATION_MESSAGES=""
+
+# Function to create or update a change set for a given stack
+create_change_set() {
+  local stack_name=$1
+  local stack_env=$2
+  local template_url=$3
+  local parameters=$4
+
+  local full_stack_name="${stack_name}-stack-${stack_env}"
+  local change_set_name="${stack_name}-stack-changeset"
+
+  if aws cloudformation describe-stacks --stack-name "${full_stack_name}" >/dev/null 2>&1; then
+    echo "Updating ${full_stack_name}..."
+    
+    aws cloudformation create-change-set --stack-name "${full_stack_name}" \
+      --template-url "${template_url}" \
+      --change-set-name "${change_set_name}" \
       --capabilities CAPABILITY_NAMED_IAM \
       --include-nested-stacks \
-      --parameters "$parameters"
+      --parameters ${parameters}
 
-    # Wait for change set creation to complete
-    aws cloudformation wait change-set-create-complete --stack-name ${stack}-${StackENV} --change-set-name ${stack}-changeset
+    aws cloudformation wait change-set-create-complete --stack-name "${full_stack_name}" --change-set-name "${change_set_name}"
     
-    # Describe the change set
-    aws cloudformation describe-change-set --stack-name ${stack}-${StackENV} --change-set-name ${stack}-changeset
+    local change_set_status=$(aws cloudformation describe-change-set --stack-name "${full_stack_name}" --change-set-name "${change_set_name}" --query 'Status' --output text)
+    echo "Change set status: ${change_set_status}"
+    
+    if [ "${change_set_status}" == "CREATE_COMPLETE" ]; then
+      accumulate_message "${full_stack_name}" "${change_set_status}"
+    fi
+    
   else
-    echo "${stack} does not exist."
+    echo "Stack ${full_stack_name} does not exist."
   fi
+}
+
+# Function to accumulate messages to be sent to Microsoft Teams
+accumulate_message() {
+  local STACK_NAME=$1
+  local STATUS=$2
+  local STACK_URL="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=&filteringStatus=active&viewNested=false"
+  
+  if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
+    local MESSAGE="Some new changes have occurred in **${STACK_NAME}**. Please review and approve to execute."
+  elif [ "${STATUS}" == "FAILED" ]; then
+    local MESSAGE="No changes detected in **${STACK_NAME}**."
+  else
+    local MESSAGE="Unknown status ${STATUS} for stack **${STACK_NAME}**."
+  fi
+
+  NOTIFICATION_MESSAGES+="${MESSAGE}<br>Status: **${STATUS}**.<br>CloudFormation Stack URL: ${STACK_URL}<br><br>"
+}
+
+# Function to send the accumulated notification to Microsoft Teams
+send_notification() {
+  local WEBHOOK_URL="https://knackforge.webhook.office.com//webhookb2/4200c843-c469-46b9-a7e0-3c059c22e68c@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/d073338c8ee14403873ff0900646574f/73c1d036-08b9-4dd3-8346-afa964097b0a"
+  local PAYLOAD="{\"text\": \"${NOTIFICATION_MESSAGES}\"}"
+  
+  curl -H "Content-Type: application/json" -d "${PAYLOAD}" "${WEBHOOK_URL}"
+}
+
+# Define stacks and their specific parameter files
+declare -A stacks
+stacks[helper]="https://test-cloudformation-template-current-stack.s3.amazonaws.com/helper-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/helper_stack_parameters.json"
+stacks[network]="https://test-cloudformation-template-current-stack.s3.amazonaws.com/network-stack/RootStack.yaml ./parameters/network_stack_parameters.json"
+stacks[infra]="https://test-cloudformation-template-current-stack.s3.amazonaws.com/infra-stack/RootStack.yaml ./parameters/common_parameters.json ./parameters/infra_stack_parameters.json"
+
+# Loop through each stack and create/update the change set
+for stack_name in "${!stacks[@]}"; do
+  IFS=' ' read -r -a stack_params <<< "${stacks[$stack_name]}"
+  template_url=${stack_params[0]}
+  parameter_files=("${stack_params[@]:1}")
+
+  # Combine parameters from all specified JSON files
+  parameters=""
+  for param_file in "${parameter_files[@]}"; do
+    echo "Loading parameters from ${param_file}..."
+    parameters+=$(load_parameters_from_json "${param_file}")" "
+  done
+
+  create_change_set "${stack_name}" "${STACK_ENV}" "${template_url}" "${parameters}"
 done
+
+# Send the accumulated notification to Microsoft Teams
+send_notification
