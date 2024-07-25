@@ -51,6 +51,18 @@ load_parameters_from_json() {
   esac
 }
 
+# Function to load parameters from a shell script
+load_parameters_from_sh() {
+  local sh_file=$1
+  
+  if [ ! -f "${sh_file}" ]; then
+    echo "Error: Shell script file ${sh_file} does not exist."
+    exit 1
+  fi
+  
+  source "${sh_file}"
+}
+
 # Initialize a variable to accumulate messages
 NOTIFICATION_MESSAGES=""
 
