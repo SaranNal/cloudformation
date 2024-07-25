@@ -1,0 +1,22 @@
+[
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "$Environment"
+  },
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "$ProjectName"
+  },
+  {
+    "ParameterKey": "CodeStarConnectionID",
+    "ParameterValue": "$CodeStarConnectionID"
+  },
+  {
+    "ParameterKey": "StackBucketName",
+    "ParameterValue": "$StackBucketName"
+  },
+  {
+    "ParameterKey": "S3LogBucket",
+    "ParameterValue": "$S3LogBucket"
+  }
+]

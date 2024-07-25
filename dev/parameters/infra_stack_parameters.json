@@ -1,0 +1,22 @@
+[
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "$ProjectName"
+  },
+  {
+    "ParameterKey": "SSLCertificateID",
+    "ParameterValue": "$SSLCertificateID"
+  },
+  {
+    "ParameterKey": "StackBucketName",
+    "ParameterValue": "$StackBucketName"
+  },
+  {
+    "ParameterKey": "CodeStarConnectionID",
+    "ParameterValue": "$CodeStarConnectionID"
+  },
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "$Environment"
+  }
+]

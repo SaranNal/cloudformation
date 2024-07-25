@@ -1,0 +1,14 @@
+[
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "$Environment"
+  },
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "$ProjectName"
+  },
+  {
+    "ParameterKey": "StackBucketName",
+    "ParameterValue": "$StackBucketName"
+  }
+]
