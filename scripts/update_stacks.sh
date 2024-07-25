@@ -93,9 +93,9 @@ network_stack_parameters_file="dev/parameters/network_stack_parameters.json"
 infra_stack_parameters_file="dev/parameters/infra_stack_parameters.json"
 
 # Update stacks
-update_stack "helper-stack" "https://test-cloudformation-template-current-stack.s3.amazonaws.com/helper-stack/RootStack.yaml" "${helper_stack_parameters_file}"
-update_stack "network-stack" "https://test-cloudformation-template-current-stack.s3.amazonaws.com/network-stack/RootStack.yaml" "${network_stack_parameters_file}"
-update_stack "infra-stack" "https://test-cloudformation-template-current-stack.s3.amazonaws.com/infra-stack/RootStack.yaml" "${infra_stack_parameters_file}"
+update_stack "helper-stack" "https://test-cloudformation-template-clone-stack.s3.amazonaws.com/helper-stack/RootStack.yaml" "${helper_stack_parameters_file}"
+update_stack "network-stack" "https://test-cloudformation-template-clone-stack.s3.amazonaws.com/network-stack/RootStack.yaml" "${network_stack_parameters_file}"
+update_stack "infra-stack" "https://test-cloudformation-template-clone-stack.s3.amazonaws.com/infra-stack/RootStack.yaml" "${infra_stack_parameters_file}"
 
 # Send the accumulated notification to Microsoft Teams
 send_notification
