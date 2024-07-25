@@ -87,10 +87,10 @@ send_notification() {
 }
 
 # File paths to parameters
-common_parameters_file="stage/parameters/common_parameters.json"
-helper_stack_parameters_file="stage/parameters/helper_stack_parameters.json"
-network_stack_parameters_file="stage/parameters/network_stack_parameters.json"
-infra_stack_parameters_file="stage/parameters/infra_stack_parameters.json"
+common_parameters_file="dev/parameters/common_parameters.json"
+helper_stack_parameters_file="dev/parameters/helper_stack_parameters.json"
+network_stack_parameters_file="dev/parameters/network_stack_parameters.json"
+infra_stack_parameters_file="dev/parameters/infra_stack_parameters.json"
 
 # Update stacks
 update_stack "helper-stack" "https://test-cloudformation-template-current-stack.s3.amazonaws.com/helper-stack/RootStack.yaml" "${helper_stack_parameters_file}"
