@@ -1,7 +1,7 @@
 version: 0.2
 
-env:
-  variables:
+# env:
+#   variables:
     # VPCId: "vpc-0d6dbbb56ffdd43f9"
     # PublicSubnets: "$PublicSubnets"
     # PrivateSubnets: "$PrivateSubnets"
