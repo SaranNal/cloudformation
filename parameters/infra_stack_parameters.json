@@ -1,5 +1,5 @@
 {
-  INFRA_STACK_PARAMETERS: [
+  "INFRA_STACK_PARAMETERS": [
     {
       "ParameterKey": "VPCId",
       "ParameterValue": "vpc-0d6dbbb56ffdd43f9"
