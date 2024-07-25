@@ -27,7 +27,7 @@ phases:
       - echo "Converting parameters to string"
       - |
         PRIVATE_SUBNETS=$(echo ${PrivateSubnets} | jq -R -s -c 'split(" ") | join(",")' | tr -d '\n')
-        echo "PublicSubnets as string: $REIVATE_SUBNETS"
+        echo "PrivateSubnets as string: $PRIVATE_SUBNETS"
       - echo running stack updates
       - chmod +x ./scripts/update_stacks.sh
       - ./scripts/update_stacks.sh
