@@ -20,14 +20,14 @@ phases:
       - echo running s3 sync command
       - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec.yml" --exclude "buildspec-stack-update.yml" --exclude "scripts/*" --exclude "parameters/*" --exclude ".gitignore"
 
-      - echo "Converting parameters to string"
-      - |
-        PUBLIC_SUBNETS=$(echo ${PublicSubnets} | jq -R -s -c 'split(" ") | join(",")' | tr -d '\n')
-        echo "PublicSubnets as string: $PUBLIC_SUBNETS"
-      - echo "Converting parameters to string"
-      - |
-        PRIVATE_SUBNETS=$(echo ${PrivateSubnets} | jq -R -s -c 'split(" ") | join(",")' | tr -d '\n')
-        echo "PrivateSubnets as string: $PRIVATE_SUBNETS"
+      # - echo "Converting parameters to string"
+      # - |
+      #   PUBLIC_SUBNETS=$(echo ${PublicSubnets} | jq -R -s -c 'split(" ") | join(",")' | tr -d '\n')
+      #   echo "PublicSubnets as string: $PUBLIC_SUBNETS"
+      # - echo "Converting parameters to string"
+      # - |
+      #   PRIVATE_SUBNETS=$(echo ${PrivateSubnets} | jq -R -s -c 'split(" ") | join(",")' | tr -d '\n')
+      #   echo "PrivateSubnets as string: $PRIVATE_SUBNETS"
       - echo running stack updates
       - chmod +x ./scripts/update_stacks.sh
       - ./scripts/update_stacks.sh
