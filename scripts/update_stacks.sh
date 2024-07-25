@@ -12,11 +12,11 @@ echo "StackBucketName is set to: ${CLONE_TEMPLATE_BUCKET}"
 echo "PublicSubnets is set to: ${PublicSubnets}"
 echo "PrivateSubnets is set to: ${PrivateSubnets}"
 
-# Convert PublicSubnets and PrivateSubnets to strings
-PUBLIC_SUBNETS=$(echo ${PublicSubnets} | jq -R -s -c 'split(" ") | join(",")' | tr -d '\n')
+# Convert PublicSubnets and PrivateSubnets to comma-separated strings
+PUBLIC_SUBNETS=$(echo ${PublicSubnets} | jq -R -s -c 'split(",") | join(",")' | tr -d '\n')
 echo "PublicSubnets as string: $PUBLIC_SUBNETS"
 
-PRIVATE_SUBNETS=$(echo ${PrivateSubnets} | jq -R -s -c 'split(" ") | join(",")' | tr -d '\n')
+PRIVATE_SUBNETS=$(echo ${PrivateSubnets} | jq -R -s -c 'split(",") | join(",")' | tr -d '\n')
 echo "PrivateSubnets as string: $PRIVATE_SUBNETS"
 
 # Function to replace environment variables in a JSON file
@@ -97,7 +97,7 @@ accumulate_message() {
 
 # Function to send the accumulated notification to Microsoft Teams
 send_notification() {
-  local webhook_url="https://knackforge.webhook.office.com///webhookb2/93eea688-6368-4c47-8d54-92a7ba364b30@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/b33092ade4844d969f3031df68fd25b4/73c1d036-08b9-4dd3-8346-afa964097b0a"
+  local webhook_url="https://knackforge.webhook.office.com//webhookb2/4200c843-c469-46b9-a7e0-3c059c22e68c@196eed21-c67a-4aae-a70b-9f97644d5d14/IncomingWebhook/d073338c8ee14403873ff0900646574f/73c1d036-08b9-4dd3-8346-afa964097b0a"
   local payload="{\"text\": \"${NOTIFICATION_MESSAGES}\"}"
   
   curl -H "Content-Type: application/json" -d "${payload}" "${webhook_url}"
@@ -122,6 +122,9 @@ for stack_name in "${!stacks[@]}"; do
     parameters+=$(load_parameters_from_json "${param_file}")" "
   done
 
+  # Replace lists with comma-separated strings
+  parameters=$(echo "${parameters}" | sed -e "s/ParameterKey=PublicSubnets,ParameterValue=\[\(.*\)\]/ParameterKey=PublicSubnets,ParameterValue=\1/" -e "s/ParameterKey=PrivateSubnets,ParameterValue=\[\(.*\)\]/ParameterKey=PrivateSubnets,ParameterValue=\1/")
+  
   create_change_set "${stack_name}" "${STACK_ENV}" "${template_url}" "${parameters}"
 done
 
