@@ -12,7 +12,7 @@ phases:
       - aws s3 sync ./ s3://${CLONE_TEMPLATE_BUCKET}/ --exclude "buildspec.yml" --exclude "buildspec-stack-update.yml" --exclude "scripts/*" --exclude "parameters/*" --exclude ".gitignore"
       - echo running stack updates
       - chmod +x ./scripts/update_stacks.sh
-      - ./scripts/update_stacks.sh $STACK_ENV $Environment
+      - ./scripts/update_stacks.sh $STACK_ENV
 
 artifacts:
   files:
