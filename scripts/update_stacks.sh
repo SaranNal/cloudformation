@@ -8,13 +8,13 @@ function load_parameters() {
   for json_file in "${json_files[@]}"; do
     if [[ -f "$json_file" ]]; then
       # Append parameters in JSON format
-      parameters+=" $(jq -c '.[] | {ParameterKey: .ParameterKey, ParameterValue: .ParameterValue}' "$json_file")"
+      parameters+=$(jq -c '.[] | {ParameterKey: .ParameterKey, ParameterValue: .ParameterValue}' "$json_file")
     else
       echo "Warning: File $json_file not found."
     fi
   done
-  
-  echo "$parameters"
+
+  echo "$parameters" | jq -s add # Combine JSON objects into a single array
 }
 
 # Define the environment variable
