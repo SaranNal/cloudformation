@@ -70,7 +70,7 @@ accumulate_message() {
   STACK_URL="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=&filteringStatus=active&viewNested=false"
   
   if [ -z "${NOTIFICATION_MESSAGES}" ]; then
-    NOTIFICATION_MESSAGES="**New updates for the CloudFormation templates**:<br><br>"
+    NOTIFICATION_MESSAGES="**New updates for the CloudFormation templates:**<br><br>"
   fi
 
   if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
