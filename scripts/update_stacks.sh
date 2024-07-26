@@ -50,7 +50,7 @@ update_stack() {
                                          --change-set-name "${change_set_name}" \
                                          --capabilities CAPABILITY_NAMED_IAM \
                                          --include-nested-stacks \
-                                         --parameters file://parameters/${stack_name}-parameters.json
+                                         --parameters file://parameters/stage/${stack_name}-parameters.json
     aws cloudformation wait change-set-create-complete --stack-name "${stack_name}-${STACK_ENV}" --change-set-name "${change_set_name}"
     change_set_status=$(aws cloudformation describe-change-set --stack-name "${stack_name}-${STACK_ENV}" --change-set-name "${change_set_name}" --query 'Status' --output text)
 
@@ -87,10 +87,10 @@ send_notification() {
 }
 
 # File paths to parameters
-common_parameters_file="stage/parameters/common-parameters.json"
-helper_stack_parameters_file="stage/parameters/helper-stack-parameters.json"
-network_stack_parameters_file="stage/parameters/network-stack-parameters.json"
-infra_stack_parameters_file="stage/parameters/infra-stack-parameters.json"
+common_parameters_file="parameters/stage/common-parameters.json"
+helper_stack_parameters_file="parameters/stage/helper-stack-parameters.json"
+network_stack_parameters_file="parameters/stage/network-stack-parameters.json"
+infra_stack_parameters_file="parameters/stage/infra-stack-parameters.json"
 
 # Update stacks
 update_stack "helper-stack" "https://test-cloudformation-template-current-stack.s3.amazonaws.com/helper-stack/RootStack.yaml" "${helper_stack_parameters_file}"
