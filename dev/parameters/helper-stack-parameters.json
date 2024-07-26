@@ -5,11 +5,11 @@
   },
   {
     "ParameterKey": "ProjectName",
-    "ParameterValue": "$ProjectName"
+    "ParameterValue": "${ProjectName}"
   },
   {
     "ParameterKey": "CodeStarConnectionID",
-    "ParameterValue": "$CodeStarConnectionID"
+    "ParameterValue": "${CodeStarConnectionID}"
   },
   {
     "ParameterKey": "StackBucketName",
@@ -17,6 +17,6 @@
   },
   {
     "ParameterKey": "S3LogBucket",
-    "ParameterValue": "$S3LogBucket"
+    "ParameterValue": "${S3LogBucket}"
   }
 ]
