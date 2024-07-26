@@ -1,14 +1,5 @@
 version: 0.2
 
-# env:
-#   variables:
-#     STACK_ENV: "$STACK_ENV"
-    # PublicSubnets: "$PublicSubnets"
-    # PrivateSubnets: "$PrivateSubnets"
-    # HTTPSListener1: "arn:aws:elasticloadbalancing:us-east-1:484537496937:listener/app/saran-dev-alb/c91cf37143bcddb9/6846a10a435505fa"
-    # HTTPSListener2: "arn:aws:elasticloadbalancing:us-east-1:484537496937:listener/app/saran-dev-alb/c91cf37143bcddb9/786465df81c6d263"
-    # SecurityGroup: "sg-03a5216036e64eaa4"
-
 phases:
   pre_build:
     commands:
