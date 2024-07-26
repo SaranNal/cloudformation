@@ -1,0 +1,18 @@
+[
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "stage"
+  },
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "saran"
+  },
+  {
+    "ParameterKey": "StackBucketName",
+    "ParameterValue": "test-cloudformation-template-current-stack"
+  },
+  {
+    "ParameterKey": "VPCId",
+    "ParameterValue": "vpc-0d6dbbb56ffdd43f9"
+  }
+]
