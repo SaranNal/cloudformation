@@ -1,8 +1,8 @@
 #!/bin/bash
 
 echo "${parameters}"
-echo "${CLONE_TEMPLATE_BUCKET}"
-echo "${StackBucketName}"
+echo "CLONE_TEMPLATE_BUCKET: $CLONE_TEMPLATE_BUCKET"
+echo "StackBucketName: $StackBucketName"
 
 # Define parameters
 STACK_ENV=$1
