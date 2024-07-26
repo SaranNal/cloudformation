@@ -76,7 +76,10 @@ accumulate_message() {
   if [ "${STATUS}" == "CREATE_COMPLETE" ]; then
     MESSAGE="Some new changes have occurred in **${STACK_NAME}**. Please review and approve to execute."
     NOTIFICATION_MESSAGES+="${MESSAGE}<br>Status: **${STATUS}**.<br>CloudFormation Stack URL: ${STACK_URL}<br><br>"
-  elif [ "${STATUS}" != "FAILED" ]; then
+  elif [ "${STATUS}" == "FAILED" ]; then
+    MESSAGE="No changes detected in **${STACK_NAME}**."
+    NOTIFICATION_MESSAGES+="${MESSAGE}<br>CloudFormation Stack URL: ${STACK_URL}<br><br>"
+  else
     MESSAGE="Unknown status ${STATUS} for stack **${STACK_NAME}**."
     NOTIFICATION_MESSAGES+="${MESSAGE}<br>Status: **${STATUS}**.<br>CloudFormation Stack URL: ${STACK_URL}<br><br>"
   fi
