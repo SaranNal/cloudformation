@@ -13,7 +13,7 @@
   },
   {
     "ParameterKey": "StackBucketName",
-    "ParameterValue": "$CLONE_TEMPLATE_BUCKET"
+    "ParameterValue": "test-cloudformation-template-clone-stack"
   },
   {
     "ParameterKey": "S3LogBucket",
