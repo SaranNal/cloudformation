@@ -64,10 +64,6 @@ Resources:
               - arn:aws:s3:::exported-maps/*
               - arn:aws:s3:::saran-assets
               - arn:aws:s3:::saran-assets/*
-              - arn:aws:s3:::cloud-test-knackforge
-              - arn:aws:s3:::cloud-test-knackforge/*
-              - arn:aws:s3:::aws-knackforge
-              - arn:aws:s3:::aws-knackforge/*
         - PolicyName: EXEC_SSM_Permissions
           PolicyDocument:
             Version: '2012-10-17'
