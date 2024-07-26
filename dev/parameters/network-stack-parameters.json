@@ -9,6 +9,6 @@
   },
   {
     "ParameterKey": "StackBucketName",
-    "ParameterValue": "$StackBucketName"
+    "ParameterValue": "$CLONE_TEMPLATE_BUCKET"
   }
 ]
