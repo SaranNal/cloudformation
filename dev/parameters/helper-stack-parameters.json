@@ -5,11 +5,11 @@
   },
   {
     "ParameterKey": "ProjectName",
-    "ParameterValue": "${ProjectName}"
+    "ParameterValue": "saran"
   },
   {
     "ParameterKey": "CodeStarConnectionID",
-    "ParameterValue": "${CodeStarConnectionID}"
+    "ParameterValue": "93b8e92b-c501-4fb7-a30d-487c138b6d46"
   },
   {
     "ParameterKey": "StackBucketName",
@@ -17,6 +17,6 @@
   },
   {
     "ParameterKey": "S3LogBucket",
-    "ParameterValue": "${S3LogBucket}"
+    "ParameterValue": "saran-s3-access-logs"
   }
 ]
