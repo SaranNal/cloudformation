@@ -1,19 +1,19 @@
 [
   {
     "ParameterKey": "ProjectName",
-    "ParameterValue": "$ProjectName"
+    "ParameterValue": "saran"
   },
   {
     "ParameterKey": "SSLCertificateID",
-    "ParameterValue": "$SSLCertificateID"
+    "ParameterValue": "c038183c-5752-4c8f-b992-4f5c166c8b14"
   },
   {
     "ParameterKey": "StackBucketName",
-    "ParameterValue": "$CLONE_TEMPLATE_BUCKET"
+    "ParameterValue": "test-cloudformation-template-clone-stack"
   },
   {
     "ParameterKey": "CodeStarConnectionID",
-    "ParameterValue": "$CodeStarConnectionID"
+    "ParameterValue": "93b8e92b-c501-4fb7-a30d-487c138b6d46"
   },
   {
     "ParameterKey": "Environment",
