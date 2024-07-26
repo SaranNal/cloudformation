@@ -11,13 +11,13 @@ CLONE_TEMPLATE_BUCKET=$5
 S3LogBucket=$6
 SSLCertificateID=$7
 
-# Function to convert JSON parameters to the correct format
-flatten_parameters() {
-  local parameters_file=$1
+# # Function to convert JSON parameters to the correct format
+# flatten_parameters() {
+#   local parameters_file=$1
 
-  # Generate parameters in JSON array format
-  jq -c '[.[] | {ParameterKey: .ParameterKey, ParameterValue: (.ParameterValue | if type == "array" then join(",") else . end)}]' "${parameters_file}"
-}
+#   # Generate parameters in JSON array format
+#   jq -c '[.[] | {ParameterKey: .ParameterKey, ParameterValue: (.ParameterValue | if type == "array" then join(",") else . end)}]' "${parameters_file}"
+# }
 
 # Function to update a CloudFormation stack
 update_stack() {
@@ -26,20 +26,20 @@ update_stack() {
   local parameters_file=$3
   local change_set_name="${stack_name}-changeset"
 
-  # Check if parameters file exists
-  if [[ ! -f "${parameters_file}" ]]; then
-    echo "Parameters file ${parameters_file} does not exist."
-    exit 1
-  fi
+  # # Check if parameters file exists
+  # if [[ ! -f "${parameters_file}" ]]; then
+  #   echo "Parameters file ${parameters_file} does not exist."
+  #   exit 1
+  # fi
 
-  # Validate JSON file
-  if ! jq empty "${parameters_file}" >/dev/null 2>&1; then
-    echo "Parameters file ${parameters_file} is not valid JSON."
-    exit 1
-  fi
+  # # Validate JSON file
+  # if ! jq empty "${parameters_file}" >/dev/null 2>&1; then
+  #   echo "Parameters file ${parameters_file} is not valid JSON."
+  #   exit 1
+  # fi
 
-  # Flatten parameters
-  local parameters=$(flatten_parameters "${parameters_file}")
+  # # Flatten parameters
+  # local parameters=$(flatten_parameters "${parameters_file}")
 
   # Check if stack exists
   echo "Checking changes for ${stack_name}..."
@@ -50,7 +50,7 @@ update_stack() {
                                          --change-set-name "${change_set_name}" \
                                          --capabilities CAPABILITY_NAMED_IAM \
                                          --include-nested-stacks \
-                                         --parameters "${parameters}"
+                                         --parameters file://parameters/${stack_name}-parameters.json
     aws cloudformation wait change-set-create-complete --stack-name "${stack_name}-${STACK_ENV}" --change-set-name "${change_set_name}"
     change_set_status=$(aws cloudformation describe-change-set --stack-name "${stack_name}-${STACK_ENV}" --change-set-name "${change_set_name}" --query 'Status' --output text)
 
@@ -87,10 +87,10 @@ send_notification() {
 }
 
 # File paths to parameters
-common_parameters_file="stage/parameters/common_parameters.json"
-helper_stack_parameters_file="stage/parameters/helper_stack_parameters.json"
-network_stack_parameters_file="stage/parameters/network_stack_parameters.json"
-infra_stack_parameters_file="stage/parameters/infra_stack_parameters.json"
+common_parameters_file="stage/parameters/common-parameters.json"
+helper_stack_parameters_file="stage/parameters/helper-stack-parameters.json"
+network_stack_parameters_file="stage/parameters/network-stack-parameters.json"
+infra_stack_parameters_file="stage/parameters/infra-stack-parameters.json"
 
 # Update stacks
 update_stack "helper-stack" "https://test-cloudformation-template-current-stack.s3.amazonaws.com/helper-stack/RootStack.yaml" "${helper_stack_parameters_file}"
